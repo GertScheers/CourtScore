@@ -53,7 +53,6 @@ dependencies {
     //SDP & SSP
     implementation(libs.intuit.sdp.android)
     implementation(libs.intuit.ssp.android)
-    implementation(libs.androidx.wear.navigation)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

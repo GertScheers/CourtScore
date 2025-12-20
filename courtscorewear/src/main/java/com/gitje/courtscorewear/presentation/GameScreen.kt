@@ -52,18 +52,23 @@ fun GameScreen(gameType: GameType) {
     var team2Score by remember { mutableIntStateOf(0) }
     var activePlayer by remember { mutableIntStateOf(0) }
 
-    //TODO: Figure out why this launchedEffect doesn't update on adding an element to the list
     LaunchedEffect(scoreHistory.size) {
         team1Score = scoreHistory.count { it == 1 }
         team2Score = scoreHistory.count { it == 2 }
-        activePlayer = scoreHistory.lastOrNull() ?: 0
+        activePlayer = scoreHistory.lastOrNull() ?: activePlayer
     }
-    
-    if(activePlayer == 0) {
+
+    if (activePlayer == 0) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text("Who will start?")
-            Button(onClick = { activePlayer = 1 }, modifier = Modifier.fillMaxWidth(0.6f)) { Text("They/she/him") }
-            Button(onClick = { activePlayer = 2 }, modifier = Modifier.fillMaxWidth(0.6f)) { Text("We/me") }
+            Button(
+                onClick = { activePlayer = 1 },
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) { Text("They/(s)he") }
+            Button(
+                onClick = { activePlayer = 2 },
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) { Text("We/me") }
         }
     } else {
         Box(Modifier.fillMaxHeight(0.8f)) {
@@ -86,7 +91,11 @@ fun GameScreen(gameType: GameType) {
                     Text("Team 1")
                     Row(Modifier.fillMaxWidth(0.7f)) {
                         if (activePlayer == 1) {
-                            Row(Modifier.weight(0.4f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
+                            Row(
+                                Modifier.weight(0.4f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
                                 if (team1Score % 2 == 0) {
                                     Icon(
                                         imageVector = ImageVector.vectorResource(R.drawable.ic_active_player_even),
@@ -96,7 +105,10 @@ fun GameScreen(gameType: GameType) {
                                 }
                             }
                             Text(" | ", Modifier.weight(0.1f))
-                            Row(Modifier.weight(0.4f), verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                Modifier.weight(0.4f),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 if (team1Score % 2 != 0) {
                                     Text("$team1Score", Modifier.padding(start = 3.dp))
                                     Icon(
@@ -106,9 +118,18 @@ fun GameScreen(gameType: GameType) {
                                 }
                             }
                         } else {
-                            Text(if (team2Score % 2 == 0) "$team1Score" else "", Modifier.weight(0.4f), textAlign = TextAlign.End)
+                            Text(
+                                if (team2Score % 2 == 0) "$team1Score" else "",
+                                Modifier.weight(0.4f),
+                                textAlign = TextAlign.End
+                            )
                             Text(" | ", Modifier.weight(0.1f))
-                            Text(if (team2Score % 2 != 0) "$team1Score" else "", Modifier.weight(0.4f).padding(start = 3.dp))
+                            Text(
+                                if (team2Score % 2 != 0) "$team1Score" else "",
+                                Modifier
+                                    .weight(0.4f)
+                                    .padding(start = 3.dp)
+                            )
                         }
                     }
                 }
@@ -127,7 +148,11 @@ fun GameScreen(gameType: GameType) {
                     Text("Team 2")
                     Row(Modifier.fillMaxWidth(0.7f)) {
                         if (activePlayer == 2) {
-                            Row(Modifier.weight(0.4f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
+                            Row(
+                                Modifier.weight(0.4f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
                                 if (team2Score % 2 != 0) {
                                     Icon(
                                         imageVector = ImageVector.vectorResource(R.drawable.ic_active_player_even),
@@ -137,7 +162,10 @@ fun GameScreen(gameType: GameType) {
                                 }
                             }
                             Text(" | ", Modifier.weight(0.1f))
-                            Row(Modifier.weight(0.4f), verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                Modifier.weight(0.4f),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 if (team2Score % 2 == 0) {
                                     Text("$team2Score", Modifier.padding(start = 3.dp))
                                     Icon(
@@ -147,9 +175,18 @@ fun GameScreen(gameType: GameType) {
                                 }
                             }
                         } else {
-                            Text(if (team1Score % 2 != 0) "$team2Score" else "", Modifier.weight(0.4f), textAlign = TextAlign.End)
+                            Text(
+                                if (team1Score % 2 != 0) "$team2Score" else "",
+                                Modifier.weight(0.4f),
+                                textAlign = TextAlign.End
+                            )
                             Text(" | ", Modifier.weight(0.1f))
-                            Text(if (team1Score % 2 == 0) "$team2Score" else "", Modifier.weight(0.4f).padding(start = 3.dp))
+                            Text(
+                                if (team1Score % 2 == 0) "$team2Score" else "",
+                                Modifier
+                                    .weight(0.4f)
+                                    .padding(start = 3.dp)
+                            )
                         }
                     }
                 }
@@ -161,7 +198,13 @@ fun GameScreen(gameType: GameType) {
                     .align(alignment = Alignment.Center)
                     .size(32.dp)
             )
-            CompactButton({ }, Modifier.align(alignment = Alignment.CenterStart)) {
+            CompactButton(
+                {
+                    if (scoreHistory.isNotEmpty())
+                        scoreHistory.removeAt(scoreHistory.size - 1)
+                },
+                Modifier.align(alignment = Alignment.CenterStart)
+            ) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_undo), null)
             }
         }

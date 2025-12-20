@@ -56,7 +56,6 @@ fun WearApp() {
             navController = navController,
             startDestination = "sports_choice"
         ) {
-            // TODO: build navigation graph
             composable("sports_choice") {
                 Box(
                     modifier = Modifier
@@ -65,7 +64,7 @@ fun WearApp() {
                     contentAlignment = Alignment.Center
                 ) {
                     SportsChoice { gt ->
-                        navController.navigate("game_screen/$gt")
+                        navController.navigate("game_screen/${gt.name}")
                     }
                 }
             }
@@ -79,7 +78,7 @@ fun WearApp() {
                 ) {
                     GameScreen(
                         gameType = GameType.valueOf(
-                            it.arguments?.getString("gameType") ?: "Tennis"
+                            it.arguments?.getString("gt") ?: "Tennis"
                         )
                     )
                 }
