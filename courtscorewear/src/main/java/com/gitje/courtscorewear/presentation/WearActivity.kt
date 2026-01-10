@@ -80,7 +80,9 @@ fun WearApp() {
                         gameType = GameType.valueOf(
                             it.arguments?.getString("gt") ?: "Tennis"
                         )
-                    )
+                    ) {
+                        navController.popBackStack(route = "sports_choice", false)
+                    }
                 }
             }
         }
