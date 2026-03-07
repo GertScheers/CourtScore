@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -52,6 +57,9 @@ class WearActivity : ComponentActivity() {
 fun WearApp() {
     CourtScoreTheme {
         val navController = rememberSwipeDismissableNavController()
+        var gameType by remember { mutableStateOf(GameType.Tennis) }
+        var gameSets by remember { mutableIntStateOf(1) }
+
         SwipeDismissableNavHost(
             navController = navController,
             startDestination = "sports_choice"
@@ -64,7 +72,22 @@ fun WearApp() {
                     contentAlignment = Alignment.Center
                 ) {
                     SportsChoice { gt ->
-                        navController.navigate("game_screen/${gt.name}")
+                        gameType = gt
+                        navController.navigate("sets_choice")
+                    }
+                }
+            }
+
+            composable("sets_choice") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colors.background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SetsChoice { sets ->
+                        gameSets = sets
+                        navController.navigate("game_screen/${gameType.name}")
                     }
                 }
             }
@@ -79,7 +102,8 @@ fun WearApp() {
                     GameScreen(
                         gameType = GameType.valueOf(
                             it.arguments?.getString("gt") ?: "Tennis"
-                        )
+                        ),
+                        gameSets = gameSets
                     ) {
                         navController.popBackStack(route = "sports_choice", false)
                     }
@@ -117,6 +141,29 @@ fun SportsChoice(navigateToGameScreen: (GameType) -> Unit) {
                         imageVector = ImageVector.vectorResource(R.drawable.ic_badminton),
                         null
                     )
+                })
+        }
+    }
+}
+
+@Composable
+fun SetsChoice(
+    setSets: (Int) -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Best of? (sets)")
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            CompactChip(
+                onClick = { setSets(1) }, label = {
+                    Text("1")
+                })
+            CompactChip(
+                onClick = { setSets(3) }, label = {
+                    Text("3")
+                })
+            CompactChip(
+                onClick = { setSets(5) }, label = {
+                    Text("5")
                 })
         }
     }

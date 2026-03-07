@@ -39,7 +39,7 @@ import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
 import com.gitje.courtscorewear.R
 
 @Composable
-fun GameScreen(gameType: GameType, backToStart: () -> Unit) {
+fun GameScreen(gameType: GameType, gameSets: Int, backToStart: () -> Unit) {
     fun handleScoreForSports(
         score1: Int,
         score2: Int
@@ -102,7 +102,7 @@ fun GameScreen(gameType: GameType, backToStart: () -> Unit) {
                     val playerTwoPoints = setOrPointHistory.count { it == 2 }
                     //Check if set is done or continue
                     if ((playerOnePoints == 6 && playerTwoPoints < 5) ||
-                        playerOnePoints >= 7 && (playerOnePoints - playerTwoPoints > 2)
+                        playerOnePoints == 7
                     ) {
                         team1TennisSetHistory.add(playerOnePoints)
                         team2TennisSetHistory.add(playerTwoPoints)
@@ -122,8 +122,8 @@ fun GameScreen(gameType: GameType, backToStart: () -> Unit) {
                     val playerOnePoints = setOrPointHistory.count { it == 1 }
                     val playerTwoPoints = setOrPointHistory.count { it == 2 }
                     //Check if set is done or continue
-                    if ((playerTwoPoints == 6 && playerOnePoints < 5) ||
-                        playerTwoPoints >= 7 && (playerTwoPoints - playerOnePoints > 2)
+                    if (((playerTwoPoints == 6 && playerOnePoints < 5) ||
+                        playerTwoPoints == 7)
                     ) {
                         team1TennisSetHistory.add(playerOnePoints)
                         team2TennisSetHistory.add(playerTwoPoints)
@@ -138,16 +138,36 @@ fun GameScreen(gameType: GameType, backToStart: () -> Unit) {
         team1BadmintonSet = setOrPointHistory.count { it == 1 }
         team2BadmintonSet = setOrPointHistory.count { it == 2 }
         if (gameType == GameType.Badminton) {
-            if (team1BadmintonSet == 2) {
+            if (team1BadmintonSet > (gameSets / 2)) {
                 //Team 1 Wins
                 wonPlayer = 1
-            } else if (team2BadmintonSet == 2) {
+            } else if (team2BadmintonSet == (gameSets/2)) {
                 //Team2 Wins
                 wonPlayer = 2
             }
         } else {
             //Tennis or Padel
+            var team1WonSets = 0
+            var team2WonSets = 0
 
+            team1TennisSetHistory.forEachIndexed { index, i ->
+                val team2SetScore = team2TennisSetHistory[index]
+                if((i == 6 && team2SetScore < 5)
+                    || i == 7) {
+                    team1WonSets++
+                } else if ((i < 5 && team2SetScore == 6)
+                    || team2SetScore == 7) {
+                    team2WonSets++
+                }
+            }
+
+            if(team1WonSets > (gameSets / 2)) {
+                //Team 1 wins
+                wonPlayer = 1
+            } else if(team2WonSets > (gameSets/2)){
+                //Team 2 wins
+                wonPlayer = 2
+            }
         }
     }
 
@@ -455,7 +475,7 @@ fun GameScreenPreview() {
             contentAlignment = Alignment.Center
         ) {
             TimeText()
-            GameScreen(GameType.Tennis) { }
+            GameScreen(GameType.Tennis, 1) { }
         }
     }
 }
