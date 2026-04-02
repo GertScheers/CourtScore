@@ -54,6 +54,8 @@ dependencies {
     implementation(libs.intuit.sdp.android)
     implementation(libs.intuit.ssp.android)
 
+    implementation(libs.koin)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

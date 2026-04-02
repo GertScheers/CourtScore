@@ -517,6 +517,7 @@ fun TennisScorePreview() {
 }
 
 enum class GameType {
+    None,
     Tennis,
     Padel,
     Badminton

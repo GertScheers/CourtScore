@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
@@ -37,7 +39,13 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
+import com.gitje.courtscorewear.logic.MainViewModel
+import com.gitje.courtscorewear.presentation.composables.BadmintonGameScreen
+import com.gitje.courtscorewear.presentation.composables.SetsChoiceScreen
+import com.gitje.courtscorewear.presentation.composables.SportsChoiceScreen
+import com.gitje.courtscorewear.presentation.composables.TennisPadelGameScreen
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
+import org.koin.androidx.compose.koinViewModel
 
 class WearActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,130 +65,75 @@ class WearActivity : ComponentActivity() {
 fun WearApp() {
     CourtScoreTheme {
         val navController = rememberSwipeDismissableNavController()
-        var gameType by remember { mutableStateOf(GameType.Tennis) }
-        var gameSets by remember { mutableIntStateOf(1) }
+        val mainViewModel : MainViewModel = koinViewModel()
+        val gameType by mainViewModel.gameType.collectAsState()
+        val gameSets by mainViewModel.sets.collectAsState()
 
-        SwipeDismissableNavHost(
-            navController = navController,
-            startDestination = "sports_choice"
-        ) {
-            composable("sports_choice") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.background),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SportsChoice { gt ->
-                        gameType = gt
-                        navController.navigate("sets_choice")
-                    }
-                }
-            }
-
-            composable("sets_choice") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.background),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SetsChoice { sets ->
-                        gameSets = sets
-                        navController.navigate("game_screen/${gameType.name}")
-                    }
-                }
-            }
-
-            composable("game_screen/{gt}") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.background),
-                    contentAlignment = Alignment.Center
-                ) {
-                    GameScreen(
-                        gameType = GameType.valueOf(
-                            it.arguments?.getString("gt") ?: "Tennis"
-                        ),
-                        gameSets = gameSets
+        Scaffold {
+            SwipeDismissableNavHost(
+                navController = navController,
+                startDestination = "sports_choice"
+            ) {
+                composable("sports_choice") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center
                     ) {
-                        navController.popBackStack(route = "sports_choice", false)
+                        SportsChoiceScreen { gameType ->
+                            mainViewModel.setGameType(gameType)
+                            navController.navigate("sets_choice")
+                        }
+                    }
+                }
+
+                composable("sets_choice") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        SetsChoiceScreen { sets ->
+                            mainViewModel.setSetsToPlay(sets)
+                            if (gameType == GameType.Tennis
+                                || gameType == GameType.Padel
+                            ) {
+                                navController.navigate("tennisPadelGameScreen")
+                            } else {
+                                navController.navigate("badmintonGameScreen")
+                            }
+                        }
+                    }
+                }
+
+                composable("tennisPadelGameScreen") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TennisPadelGameScreen(gameType, gameSets) {
+                            navController.popBackStack(route = "sports_choice", false)
+                        }
+                    }
+                }
+
+                composable("badmintonGameScreen") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BadmintonGameScreen(gameSets) {
+                            navController.popBackStack(route = "sports_choice", false)
+                        }
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun SportsChoice(navigateToGameScreen: (GameType) -> Unit) {
-    Column {
-        Text("What are we playing?")
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            CompactChip(
-                onClick = { navigateToGameScreen(GameType.Padel) },
-                icon = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_padel),
-                        null
-                    )
-                })
-            CompactChip(
-                onClick = { navigateToGameScreen(GameType.Tennis) },
-                icon = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_tennis),
-                        null
-                    )
-                })
-            CompactChip(
-                onClick = { navigateToGameScreen(GameType.Badminton) },
-                icon = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_badminton),
-                        null
-                    )
-                })
-        }
-    }
-}
-
-@Composable
-fun SetsChoice(
-    setSets: (Int) -> Unit
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Best of? (sets)")
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CompactChip(
-                onClick = { setSets(1) }, label = {
-                    Text("1")
-                })
-            CompactChip(
-                onClick = { setSets(3) }, label = {
-                    Text("3")
-                })
-            CompactChip(
-                onClick = { setSets(5) }, label = {
-                    Text("5")
-                })
-        }
-    }
-}
-
-@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    CourtScoreTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            TimeText()
-            SportsChoice { }
         }
     }
 }
