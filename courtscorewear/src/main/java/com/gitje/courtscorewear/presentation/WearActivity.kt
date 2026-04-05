@@ -10,36 +10,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.CompactChip
-import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import androidx.wear.tooling.preview.devices.WearDevices
-import com.gitje.courtscorewear.R
-import com.gitje.courtscorewear.logic.MainViewModel
+import com.gitje.courtscorewear.logic.BadmintonViewModel
+import com.gitje.courtscorewear.logic.BaseViewModel
+import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.composables.BadmintonGameScreen
 import com.gitje.courtscorewear.presentation.composables.SetsChoiceScreen
 import com.gitje.courtscorewear.presentation.composables.SportsChoiceScreen
@@ -65,9 +50,10 @@ class WearActivity : ComponentActivity() {
 fun WearApp() {
     CourtScoreTheme {
         val navController = rememberSwipeDismissableNavController()
-        val mainViewModel : MainViewModel = koinViewModel()
-        val gameType by mainViewModel.gameType.collectAsState()
-        val gameSets by mainViewModel.sets.collectAsState()
+        val baseViewModel : BaseViewModel = koinViewModel()
+        val badmintonViewModel: BadmintonViewModel = koinViewModel()
+        //TODO: val tennisViewModel: TennisViewModel = koinViewModel()
+        val gameType by baseViewModel.gameType.collectAsState()
 
         Scaffold {
             SwipeDismissableNavHost(
@@ -82,7 +68,7 @@ fun WearApp() {
                         contentAlignment = Alignment.Center
                     ) {
                         SportsChoiceScreen { gameType ->
-                            mainViewModel.setGameType(gameType)
+                            baseViewModel.setGameType(gameType)
                             navController.navigate("sets_choice")
                         }
                     }
@@ -96,12 +82,13 @@ fun WearApp() {
                         contentAlignment = Alignment.Center
                     ) {
                         SetsChoiceScreen { sets ->
-                            mainViewModel.setSetsToPlay(sets)
                             if (gameType == GameType.Tennis
                                 || gameType == GameType.Padel
                             ) {
+                                //TODO: tennisViewModel.setSetsToPlay(sets)
                                 navController.navigate("tennisPadelGameScreen")
                             } else {
+                                badmintonViewModel.configureSetsToPlay(sets)
                                 navController.navigate("badmintonGameScreen")
                             }
                         }
@@ -115,7 +102,7 @@ fun WearApp() {
                             .background(MaterialTheme.colors.background),
                         contentAlignment = Alignment.Center
                     ) {
-                        TennisPadelGameScreen(gameType, gameSets) {
+                        TennisPadelGameScreen(gameType) {
                             navController.popBackStack(route = "sports_choice", false)
                         }
                     }
@@ -128,7 +115,7 @@ fun WearApp() {
                             .background(MaterialTheme.colors.background),
                         contentAlignment = Alignment.Center
                     ) {
-                        BadmintonGameScreen(gameSets) {
+                        BadmintonGameScreen {
                             navController.popBackStack(route = "sports_choice", false)
                         }
                     }

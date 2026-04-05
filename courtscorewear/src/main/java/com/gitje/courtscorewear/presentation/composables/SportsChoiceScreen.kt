@@ -19,7 +19,7 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
-import com.gitje.courtscorewear.presentation.GameType
+import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
 
 @Composable
