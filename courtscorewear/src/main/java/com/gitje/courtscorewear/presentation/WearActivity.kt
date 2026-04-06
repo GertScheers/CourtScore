@@ -102,7 +102,7 @@ fun WearApp() {
                             .background(MaterialTheme.colors.background),
                         contentAlignment = Alignment.Center
                     ) {
-                        TennisPadelGameScreen(gameType) {
+                        TennisPadelGameScreen {
                             navController.popBackStack(route = "sports_choice", false)
                         }
                     }

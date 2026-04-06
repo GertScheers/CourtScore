@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,14 +43,14 @@ import org.koin.androidx.compose.koinViewModel
 fun BadmintonGameScreen(backToStart: () -> Unit) {
     val badmintonViewModel: BadmintonViewModel = koinViewModel()
 
-    val scoreHistory by badmintonViewModel.scoreHistory.collectAsState()
-    val wonPlayer by badmintonViewModel.wonPlayer.collectAsState()
+    val ongoingScoring by badmintonViewModel.ongoingScoring.collectAsState()
+    val wonPlayer by badmintonViewModel.wonTeam.collectAsState()
     val servingTeam by badmintonViewModel.servingTeam.collectAsState()
-    val team1SetHistory by badmintonViewModel.team1SetHistory.collectAsState()
-    val team2SetHistory by badmintonViewModel.team2SetHistory.collectAsState()
+    val team1SetHistory by badmintonViewModel.team1SetResults.collectAsState()
+    val team2SetHistory by badmintonViewModel.team2SetResults.collectAsState()
 
-    var team1Score by remember(scoreHistory) { mutableIntStateOf(scoreHistory.count { it == 1 }) }
-    var team2Score by remember(scoreHistory) { mutableIntStateOf(scoreHistory.count { it == 2 }) }
+    var team1Score by remember(ongoingScoring) { mutableIntStateOf(ongoingScoring.count { it == 1 }) }
+    var team2Score by remember(ongoingScoring) { mutableIntStateOf(ongoingScoring.count { it == 2 }) }
 
     if (wonPlayer == 0) {
         if (servingTeam == 0) {
