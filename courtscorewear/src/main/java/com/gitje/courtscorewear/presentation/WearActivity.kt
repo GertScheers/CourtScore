@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -51,10 +54,9 @@ class WearActivity : ComponentActivity() {
 fun WearApp() {
     CourtScoreTheme {
         val navController = rememberSwipeDismissableNavController()
-        val baseViewModel: BaseViewModel = koinViewModel()
         val badmintonViewModel: BadmintonViewModel = koinViewModel()
         val tennisPadelViewModel: TennisPadelViewModel = koinViewModel()
-        val gameType by baseViewModel.gameType.collectAsState()
+        var currentGameType by remember { mutableStateOf(GameType.Tennis) }
 
         Scaffold {
             SwipeDismissableNavHost(
@@ -70,7 +72,7 @@ fun WearApp() {
                         contentAlignment = Alignment.Center,
                     ) {
                         SportsChoiceScreen { gameType ->
-                            baseViewModel.setGameType(gameType)
+                            currentGameType = gameType
                             navController.navigate("sets_choice")
                         }
                     }
@@ -85,10 +87,10 @@ fun WearApp() {
                         contentAlignment = Alignment.Center,
                     ) {
                         SetsChoiceScreen { sets ->
-                            if (gameType == GameType.Tennis ||
-                                gameType == GameType.Padel
+                            if (currentGameType == GameType.Tennis ||
+                                currentGameType == GameType.Padel
                             ) {
-                                // TODO: tennisViewModel.setSetsToPlay(sets)
+                                tennisPadelViewModel.configureSetsToPlay(sets)
                                 navController.navigate("tennisPadelGameScreen")
                             } else {
                                 badmintonViewModel.configureSetsToPlay(sets)
@@ -107,7 +109,7 @@ fun WearApp() {
                         contentAlignment = Alignment.Center,
                     ) {
                         tennisPadelViewModel.startNewGame()
-                        TennisPadelGameScreen {
+                        TennisPadelGameScreen(currentGameType!!) {
                             navController.popBackStack(route = "sports_choice", false)
                         }
                     }

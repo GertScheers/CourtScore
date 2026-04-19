@@ -4,7 +4,7 @@ import android.app.Application
 import kotlin.collections.isNotEmpty
 
 class BadmintonViewModel(application: Application) : BaseViewModel(application) {
-    fun teamScored(player: Int) {
+    override fun teamScored(player: Int) {
         ongoingScoring.add(player)
 
         val setOver = checkIfSetIsWon()
@@ -24,7 +24,7 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
         }
     }
 
-    fun checkIfSetIsWon(): Int? {
+    override fun checkIfSetIsWon(): Int? {
         val team1Score = ongoingScoring.count { it == 1 }
         val team2Score = ongoingScoring.count { it == 2 }
 
@@ -36,7 +36,7 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
         return null
     }
 
-    fun undoLastScore() {
+    override fun undoLastScore() {
         if (ongoingScoring.isNotEmpty())
             ongoingScoring.removeAt(ongoingScoring.size - 1)
         else if(_team1SetResults.value.count() > 1) {

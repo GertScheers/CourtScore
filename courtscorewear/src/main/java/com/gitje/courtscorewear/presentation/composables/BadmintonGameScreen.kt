@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -28,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
@@ -45,7 +43,7 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
     val badmintonViewModel: BadmintonViewModel = koinViewModel()
 
     val ongoingScoring = remember { badmintonViewModel.ongoingScoring }
-    val wonPlayer by badmintonViewModel.wonTeam.collectAsState()
+    val wonTeam by badmintonViewModel.wonTeam.collectAsState()
     val servingTeam by badmintonViewModel.servingTeam.collectAsState()
     val team1SetHistory by badmintonViewModel.team1SetResults.collectAsState()
     val team2SetHistory by badmintonViewModel.team2SetResults.collectAsState()
@@ -53,18 +51,10 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
     var team1Score by remember(ongoingScoring.size) { mutableIntStateOf(ongoingScoring.count { it == 1 }) }
     var team2Score by remember(ongoingScoring.size) { mutableIntStateOf(ongoingScoring.count { it == 2 }) }
 
-    if (wonPlayer == 0) {
+    if (wonTeam == 0) {
         if (servingTeam == 0) {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text("Who will start?")
-                Button(
-                    onClick = { badmintonViewModel.setServingTeam(1) },
-                    modifier = Modifier.fillMaxWidth(0.6f),
-                ) { Text("They/(s)he") }
-                Button(
-                    onClick = { badmintonViewModel.setServingTeam(2) },
-                    modifier = Modifier.fillMaxWidth(0.6f),
-                ) { Text("We/me") }
+            ServerPickerScreen {
+                badmintonViewModel.setServingTeam(it)
             }
         } else {
             Box(Modifier.fillMaxHeight(0.8f)) {
@@ -89,11 +79,7 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
             }
         }
     } else {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Team ${if (wonPlayer == 1) "1" else "2"} wins!", fontSize = 26.sp)
-            Text(if (wonPlayer == 1) "Better luck next time!" else "Congratulations!")
-            Button(onClick = { backToStart() }) { Text("Return") }
-        }
+        GameFinishedScreen(wonTeam) { backToStart() }
     }
 }
 

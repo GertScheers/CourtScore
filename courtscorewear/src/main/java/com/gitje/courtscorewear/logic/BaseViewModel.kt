@@ -7,11 +7,12 @@ import com.gitje.courtscorewear.models.GameType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-open class BaseViewModel(
+abstract class BaseViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-    protected var _gameType = MutableStateFlow(GameType.None)
-    val gameType: StateFlow<GameType> = _gameType
+    abstract fun teamScored(player: Int)
+    abstract fun checkIfSetIsWon(): Int?
+    abstract fun undoLastScore()
 
     // Track ongoing points
     val ongoingScoring: SnapshotStateList<Int> = SnapshotStateList()
@@ -27,10 +28,6 @@ open class BaseViewModel(
     val servingTeam: StateFlow<Int> = _servingTeam
 
     protected var setsToPlay = 0
-
-    fun setGameType(gameTypeToPlay: GameType) {
-        _gameType.value = gameTypeToPlay
-    }
 
     fun configureSetsToPlay(sets: Int) {
         setsToPlay = sets

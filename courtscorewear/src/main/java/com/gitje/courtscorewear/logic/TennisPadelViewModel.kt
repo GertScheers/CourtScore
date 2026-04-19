@@ -6,22 +6,22 @@ import kotlinx.coroutines.flow.StateFlow
 
 class TennisPadelViewModel(application: Application): BaseViewModel(application) {
     //Stores ongoing set's points
-    private var _ongoingSetResults = MutableStateFlow<MutableList<Int>>(mutableListOf())
+    private var _ongoingSetResults = MutableStateFlow<List<Int>>(listOf())
     val ongoingSetResults: StateFlow<List<Int>> = _ongoingSetResults
 
     private var lastPointScoring = emptyList<Int>()
-    private var firstSetServer = 0
+    private var setServeStarer = 0
 
     override fun startNewGame() {
-        _ongoingSetResults.value = mutableListOf()
+        _ongoingSetResults.value = listOf()
         lastPointScoring = emptyList()
-        firstSetServer = 0
+        setServeStarer = 0
         super.startNewGame()
     }
 
     private fun checkIfPointIsWon(): Int? {
         val team1Score = ongoingScoring.count { it == 1 }
-        val team2Score = ongoingScoring.count { it == 1 }
+        val team2Score = ongoingScoring.count { it == 2 }
 
         if ((team1Score == 4 && team2Score < 3)
             || team1Score == 5
@@ -34,7 +34,7 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
         return null
     }
 
-    fun teamScored(player: Int) {
+    override fun teamScored(player: Int) {
         //Cancel ADV for other team if they had, else add point
         if ((player == 1 && ongoingScoring.count { s -> s == 2 } == 4) ||
             (player == 2 && ongoingScoring.count { s -> s == 1 } == 4))
@@ -43,26 +43,26 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
             ongoingScoring.add(player)
 
         checkIfPointIsWon()?.let { pointWonTeam ->
-            _ongoingSetResults.value.add(pointWonTeam)
+            _ongoingSetResults.value += pointWonTeam
             lastPointScoring = ongoingScoring.toList()
             ongoingScoring.clear()
             checkIfSetIsWon()?.let { _ ->
                 _team1SetResults.value.add(_ongoingSetResults.value.count { it == 1 } )
                 _team2SetResults.value.add(_ongoingSetResults.value.count { it == 2 } )
-                _ongoingSetResults.value.clear()
+                _ongoingSetResults.value = emptyList()
+                _servingTeam.value = if (setServeStarer == 1) 2 else 1
+                setServeStarer = _servingTeam.value
                 _wonTeam.value = checkIfGameIsWon()
             } ?: run {
-                //New set, first server gets switched
-                _servingTeam.value = if (firstSetServer == 1) 2 else 1
+                //New point, same set, serving takes new turn
+                _servingTeam.value = if (_servingTeam.value == 1) 2 else 1
             }
-        } ?: run {
-            _servingTeam.value = if (_servingTeam.value == 1) 2 else 1
         }
     }
 
-    fun checkIfSetIsWon(): Int? {
-        val team1Points = ongoingScoring.count { it == 1 }
-        val team2Points = ongoingScoring.count { it == 2 }
+    override fun checkIfSetIsWon(): Int? {
+        val team1Points = _ongoingSetResults.value.count { it == 1 }
+        val team2Points = _ongoingSetResults.value.count { it == 2 }
 
         if ((team1Points == 6 && team2Points < 5) ||
             team1Points == 7
@@ -78,13 +78,13 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
     }
 
     //TODO : Entire method needs testing
-    fun undoLastScore() {
+    override fun undoLastScore() {
         if (ongoingScoring.isNotEmpty())
             ongoingScoring.removeAt(ongoingScoring.size - 1)
         else if(_ongoingSetResults.value.isNotEmpty()) {
             ongoingScoring.clear()
             ongoingScoring.addAll(lastPointScoring.toMutableList())
-            _ongoingSetResults.value.removeAt(_ongoingSetResults.value.lastIndex)
+            _ongoingSetResults.value -= _ongoingSetResults.value.lastIndex
         } else if(_team1SetResults.value.isNotEmpty()) {
             //Undo won set, fill history with setHistory's values and continue playing 'closed set'
             repeat(_team1SetResults.value.last()) {

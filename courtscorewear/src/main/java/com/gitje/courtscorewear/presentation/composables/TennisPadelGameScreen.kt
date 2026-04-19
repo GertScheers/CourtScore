@@ -40,10 +40,9 @@ import com.gitje.courtscorewear.util.getTennisScore
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun TennisPadelGameScreen(backToStart: () -> Unit) {
+fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
     val viewModel: TennisPadelViewModel = koinViewModel()
 
-    val gameType by viewModel.gameType.collectAsState()
     val wonTeam by viewModel.wonTeam.collectAsState()
     val servingTeam by viewModel.servingTeam.collectAsState()
     val ongoingScore = remember { viewModel.ongoingScoring }
@@ -51,8 +50,8 @@ fun TennisPadelGameScreen(backToStart: () -> Unit) {
     val team1SetHistory by viewModel.team1SetResults.collectAsState()
     val team2SetHistory by viewModel.team2SetResults.collectAsState()
 
-    var team1Score by remember(ongoingScore) { mutableIntStateOf(ongoingScore.count { it == 1 }) }
-    var team2Score by remember(ongoingScore) { mutableIntStateOf(ongoingScore.count { it == 2 }) }
+    var team1Score by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.count { it == 1 }) }
+    var team2Score by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.count { it == 2 }) }
 
     var team1SetScore by remember(ongoingSetResults) { mutableIntStateOf(ongoingSetResults.count { it == 1 }) }
     var team2SetScore by remember(ongoingSetResults) { mutableIntStateOf(ongoingSetResults.count { it == 2 }) }
@@ -68,16 +67,8 @@ fun TennisPadelGameScreen(backToStart: () -> Unit) {
 
     if (wonTeam == 0) {
         if (servingTeam == 0) {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text("Who will start?")
-                Button(
-                    onClick = { viewModel.setServingTeam(1) },
-                    modifier = Modifier.fillMaxWidth(0.6f)
-                ) { Text("They/(s)he") }
-                Button(
-                    onClick = { viewModel.setServingTeam(2) },
-                    modifier = Modifier.fillMaxWidth(0.6f)
-                ) { Text("We/me") }
+            ServerPickerScreen {
+                viewModel.setServingTeam(it)
             }
         } else {
             Box(Modifier.fillMaxHeight(0.8f)) {
@@ -106,11 +97,7 @@ fun TennisPadelGameScreen(backToStart: () -> Unit) {
             }
         }
     } else {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Team ${if (wonTeam == 1) "1" else "2"} wins!", fontSize = 26.sp)
-            Text(if (wonTeam == 1) "Better luck next time!" else "Congratulations!")
-            Button(onClick = { backToStart() }) { Text("Return") }
-        }
+        GameFinishedScreen(wonTeam) { backToStart() }
     }
 }
 
