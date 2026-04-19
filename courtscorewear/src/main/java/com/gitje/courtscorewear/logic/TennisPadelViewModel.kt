@@ -12,9 +12,16 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
     private var lastPointScoring = emptyList<Int>()
     private var firstSetServer = 0
 
+    override fun startNewGame() {
+        _ongoingSetResults.value = mutableListOf()
+        lastPointScoring = emptyList()
+        firstSetServer = 0
+        super.startNewGame()
+    }
+
     private fun checkIfPointIsWon(): Int? {
-        val team1Score = _ongoingScoring.value.count { it == 1 }
-        val team2Score = _ongoingScoring.value.count { it == 1 }
+        val team1Score = ongoingScoring.count { it == 1 }
+        val team2Score = ongoingScoring.count { it == 1 }
 
         if ((team1Score == 4 && team2Score < 3)
             || team1Score == 5
@@ -27,18 +34,18 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
         return null
     }
 
-    override fun teamScored(player: Int) {
+    fun teamScored(player: Int) {
         //Cancel ADV for other team if they had, else add point
-        if ((player == 1 && _ongoingScoring.value.count { s -> s == 2 } == 4) ||
-            (player == 2 && _ongoingScoring.value.count { s -> s == 1 } == 4))
-            _ongoingScoring.value.removeAt(_ongoingScoring.value.lastIndex)
+        if ((player == 1 && ongoingScoring.count { s -> s == 2 } == 4) ||
+            (player == 2 && ongoingScoring.count { s -> s == 1 } == 4))
+            ongoingScoring.removeAt(ongoingScoring.lastIndex)
         else
-            _ongoingScoring.value.add(player)
+            ongoingScoring.add(player)
 
         checkIfPointIsWon()?.let { pointWonTeam ->
             _ongoingSetResults.value.add(pointWonTeam)
-            lastPointScoring = _ongoingScoring.value.toList()
-            _ongoingScoring.value.clear()
+            lastPointScoring = ongoingScoring.toList()
+            ongoingScoring.clear()
             checkIfSetIsWon()?.let { _ ->
                 _team1SetResults.value.add(_ongoingSetResults.value.count { it == 1 } )
                 _team2SetResults.value.add(_ongoingSetResults.value.count { it == 2 } )
@@ -53,9 +60,9 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
         }
     }
 
-    override fun checkIfSetIsWon(): Int? {
-        val team1Points = _ongoingScoring.value.count { it == 1 }
-        val team2Points = _ongoingScoring.value.count { it == 2 }
+    fun checkIfSetIsWon(): Int? {
+        val team1Points = ongoingScoring.count { it == 1 }
+        val team2Points = ongoingScoring.count { it == 2 }
 
         if ((team1Points == 6 && team2Points < 5) ||
             team1Points == 7
@@ -71,19 +78,20 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
     }
 
     //TODO : Entire method needs testing
-    override fun undoLastScore() {
-        if (_ongoingScoring.value.isNotEmpty())
-            _ongoingScoring.value.removeAt(_ongoingScoring.value.size - 1)
+    fun undoLastScore() {
+        if (ongoingScoring.isNotEmpty())
+            ongoingScoring.removeAt(ongoingScoring.size - 1)
         else if(_ongoingSetResults.value.isNotEmpty()) {
-            _ongoingScoring.value = lastPointScoring.toMutableList()
+            ongoingScoring.clear()
+            ongoingScoring.addAll(lastPointScoring.toMutableList())
             _ongoingSetResults.value.removeAt(_ongoingSetResults.value.lastIndex)
         } else if(_team1SetResults.value.isNotEmpty()) {
             //Undo won set, fill history with setHistory's values and continue playing 'closed set'
             repeat(_team1SetResults.value.last()) {
-                _ongoingScoring.value.add(1)
+                ongoingScoring.add(1)
             }
             repeat(_team2SetResults.value.last()) {
-                _ongoingScoring.value.add(2)
+                ongoingScoring.add(2)
             }
             _team1SetResults.value.removeAt(_team1SetResults.value.lastIndex)
             _team2SetResults.value.removeAt(_team2SetResults.value.lastIndex)

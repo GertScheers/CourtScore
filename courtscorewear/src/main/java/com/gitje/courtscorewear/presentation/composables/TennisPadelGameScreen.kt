@@ -46,7 +46,7 @@ fun TennisPadelGameScreen(backToStart: () -> Unit) {
     val gameType by viewModel.gameType.collectAsState()
     val wonTeam by viewModel.wonTeam.collectAsState()
     val servingTeam by viewModel.servingTeam.collectAsState()
-    val ongoingScore by viewModel.ongoingScoring.collectAsState()
+    val ongoingScore = remember { viewModel.ongoingScoring }
     val ongoingSetResults by viewModel.ongoingSetResults.collectAsState()
     val team1SetHistory by viewModel.team1SetResults.collectAsState()
     val team2SetHistory by viewModel.team2SetResults.collectAsState()

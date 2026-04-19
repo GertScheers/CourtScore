@@ -8,7 +8,6 @@ package com.gitje.courtscorewear.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
@@ -24,6 +24,7 @@ import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.gitje.courtscorewear.logic.BadmintonViewModel
 import com.gitje.courtscorewear.logic.BaseViewModel
+import com.gitje.courtscorewear.logic.TennisPadelViewModel
 import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.composables.BadmintonGameScreen
 import com.gitje.courtscorewear.presentation.composables.SetsChoiceScreen
@@ -50,22 +51,23 @@ class WearActivity : ComponentActivity() {
 fun WearApp() {
     CourtScoreTheme {
         val navController = rememberSwipeDismissableNavController()
-        val baseViewModel : BaseViewModel = koinViewModel()
+        val baseViewModel: BaseViewModel = koinViewModel()
         val badmintonViewModel: BadmintonViewModel = koinViewModel()
-        //TODO: val tennisViewModel: TennisViewModel = koinViewModel()
+        val tennisPadelViewModel: TennisPadelViewModel = koinViewModel()
         val gameType by baseViewModel.gameType.collectAsState()
 
         Scaffold {
             SwipeDismissableNavHost(
                 navController = navController,
-                startDestination = "sports_choice"
+                startDestination = "sports_choice",
             ) {
                 composable("sports_choice") {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center,
                     ) {
                         SportsChoiceScreen { gameType ->
                             baseViewModel.setGameType(gameType)
@@ -76,16 +78,17 @@ fun WearApp() {
 
                 composable("sets_choice") {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center,
                     ) {
                         SetsChoiceScreen { sets ->
-                            if (gameType == GameType.Tennis
-                                || gameType == GameType.Padel
+                            if (gameType == GameType.Tennis ||
+                                gameType == GameType.Padel
                             ) {
-                                //TODO: tennisViewModel.setSetsToPlay(sets)
+                                // TODO: tennisViewModel.setSetsToPlay(sets)
                                 navController.navigate("tennisPadelGameScreen")
                             } else {
                                 badmintonViewModel.configureSetsToPlay(sets)
@@ -97,11 +100,13 @@ fun WearApp() {
 
                 composable("tennisPadelGameScreen") {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center,
                     ) {
+                        tennisPadelViewModel.startNewGame()
                         TennisPadelGameScreen {
                             navController.popBackStack(route = "sports_choice", false)
                         }
@@ -110,11 +115,13 @@ fun WearApp() {
 
                 composable("badmintonGameScreen") {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center,
                     ) {
+                        badmintonViewModel.startNewGame()
                         BadmintonGameScreen {
                             navController.popBackStack(route = "sports_choice", false)
                         }

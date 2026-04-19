@@ -4,8 +4,8 @@ import android.app.Application
 import kotlin.collections.isNotEmpty
 
 class BadmintonViewModel(application: Application) : BaseViewModel(application) {
-    override fun teamScored(player: Int) {
-        _ongoingScoring.value.add(player)
+    fun teamScored(player: Int) {
+        ongoingScoring.add(player)
 
         val setOver = checkIfSetIsWon()
         //setOver == null -> Continue game
@@ -15,18 +15,18 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
             } else {
                 _servingTeam.value = 2
             }
-            _team1SetResults.value.add(_ongoingScoring.value.count { score -> score == 1 })
-            _team2SetResults.value.add(_ongoingScoring.value.count { score -> score == 2 })
-            _ongoingScoring.value.clear()
+            _team1SetResults.value.add(ongoingScoring.count { score -> score == 1 })
+            _team2SetResults.value.add(ongoingScoring.count { score -> score == 2 })
+            ongoingScoring.clear()
             _wonTeam.value = checkIfGameIsWon()
         } ?: run {
-            _servingTeam.value = _ongoingScoring.value.last()
+            _servingTeam.value = ongoingScoring.last()
         }
     }
 
-    override fun checkIfSetIsWon(): Int? {
-        val team1Score = _ongoingScoring.value.count { it == 1 }
-        val team2Score = _ongoingScoring.value.count { it == 1 }
+    fun checkIfSetIsWon(): Int? {
+        val team1Score = ongoingScoring.count { it == 1 }
+        val team2Score = ongoingScoring.count { it == 2 }
 
         if (team1Score > 20 && team1Score - team2Score > 1)
             return 1
@@ -36,17 +36,17 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
         return null
     }
 
-    override fun undoLastScore() {
-        if (_ongoingScoring.value.isNotEmpty())
-            _ongoingScoring.value.removeAt(_ongoingScoring.value.size - 1)
+    fun undoLastScore() {
+        if (ongoingScoring.isNotEmpty())
+            ongoingScoring.removeAt(ongoingScoring.size - 1)
         else if(_team1SetResults.value.count() > 1) {
             //Undo won set, fill history with setHistory's values and continue playing 'closed set'
             //TODO: This needs testing
             repeat(_team1SetResults.value.last()) {
-                _ongoingScoring.value.add(1)
+                ongoingScoring.add(1)
             }
             repeat(_team2SetResults.value.last()) {
-                _ongoingScoring.value.add(2)
+                ongoingScoring.add(2)
             }
             _team1SetResults.value.removeAt(_team1SetResults.value.lastIndex)
             _team2SetResults.value.removeAt(_team2SetResults.value.lastIndex)
