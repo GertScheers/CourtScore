@@ -11,15 +11,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -56,6 +61,16 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
     var team1SetScore by remember(ongoingSetResults) { mutableIntStateOf(ongoingSetResults.count { it == 1 }) }
     var team2SetScore by remember(ongoingSetResults) { mutableIntStateOf(ongoingSetResults.count { it == 2 }) }
 
+    var animationTriggerTeam1 by remember { mutableIntStateOf(0) }
+    var animationTriggerTeam2 by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(team1Score) {
+        animationTriggerTeam1++
+    }
+    LaunchedEffect(team2Score) {
+        animationTriggerTeam2++
+    }
+
     val vector by remember(gameType) {
         mutableIntStateOf(
             when (gameType) {
@@ -74,14 +89,16 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
             Box(Modifier.fillMaxHeight(0.8f)) {
                 //Tennis-Padel UI
                 TennisPadelScoringUI(
-                    servingTeam,
-                    vector,
-                    team1Score,
-                    team2Score,
-                    team1SetScore,
-                    team2SetScore,
-                    team1SetHistory,
-                    team2SetHistory
+                    servingPlayer = servingTeam,
+                    gameIcon = vector,
+                    team1CurrentPointScore = team1Score,
+                    team2CurrentPointScore = team2Score,
+                    team1CurrentSetScore = team1SetScore,
+                    team2CurrentSetScore = team2SetScore,
+                    team1SetHistory = team1SetHistory,
+                    team2SetHistory = team2SetHistory,
+                    popTriggerTeam1 = animationTriggerTeam1,
+                    popTriggerTeam2 = animationTriggerTeam2
                 ) {
                     viewModel.teamScored(it)
                 }
@@ -111,10 +128,22 @@ fun TennisPadelScoringUI(
     team2CurrentSetScore: Int,
     team1SetHistory: List<Int>,
     team2SetHistory: List<Int>,
+    popTriggerTeam1: Int,
+    popTriggerTeam2: Int,
     teamScored: (Int) -> Unit
 ) {
+    var rootCenter by remember { mutableStateOf(Offset.Zero) }
+
     Column(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                val position = coordinates.positionInWindow()
+                rootCenter = Offset(
+                    position.x + coordinates.size.width / 2f,
+                    position.y + coordinates.size.height / 2f
+                )
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
@@ -156,8 +185,10 @@ fun TennisPadelScoringUI(
                     }
                 }
 
-                Text(
+                AnimatedScoreText(
                     team1CurrentPointScore.getTennisScore(),
+                    popTriggerTeam1,
+                    rootCenter,
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.BottomEnd)
                 )
@@ -201,8 +232,10 @@ fun TennisPadelScoringUI(
                         Text("$team2CurrentSetScore")
                     }
                 }
-                Text(
-                    team2CurrentPointScore.getTennisScore(),
+                AnimatedScoreText(
+                    score = team2CurrentPointScore.getTennisScore(),
+                    popTrigger = popTriggerTeam2,
+                    rootCenter = rootCenter,
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.TopEnd)
                 )
@@ -229,7 +262,9 @@ fun TennisPadelPadelScoringUIPreview() {
                 5,
                 3,
                 listOf(3, 2),
-                listOf(6, 6)
+                listOf(6, 6),
+                popTriggerTeam1 = 0,
+                popTriggerTeam2 = 0
             ) { }
         }
     }

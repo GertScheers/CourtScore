@@ -1,15 +1,29 @@
 package com.gitje.courtscorewear.presentation.composables
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
+import kotlinx.coroutines.launch
 
 @Composable
 fun GameFinishedScreen(wonTeam: Int, backToStart: () -> Unit) {
@@ -33,4 +47,68 @@ fun ServerPickerScreen(setServer: (Int) -> Unit) {
             modifier = Modifier.fillMaxWidth(0.6f),
         ) { Text("We/me") }
     }
+}
+
+
+@Composable
+fun AnimatedScoreText(
+    score: String,
+    popTrigger: Int,
+    rootCenter: Offset,
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit? = null,
+) {
+    val elemCenter = remember { mutableStateOf(Offset.Zero) }
+    val transXAnim = remember { Animatable(0f) }
+    val transYAnim = remember { Animatable(0f) }
+    val scaleAnim = remember { Animatable(1f) }
+
+    LaunchedEffect(popTrigger) {
+        if (popTrigger <= 0) return@LaunchedEffect
+
+        val dx = rootCenter.x - elemCenter.value.x
+        val dy = rootCenter.y - elemCenter.value.y
+
+        scaleAnim.snapTo(10f)
+        transXAnim.snapTo(dx)
+        transYAnim.snapTo(dy)
+
+        val duration = 600
+        launch {
+            scaleAnim.animateTo(
+                1f,
+                tween(durationMillis = duration, easing = FastOutSlowInEasing),
+            )
+        }
+        launch {
+            transXAnim.animateTo(
+                0f,
+                tween(durationMillis = duration, easing = FastOutSlowInEasing),
+            )
+        }
+        launch {
+            transYAnim.animateTo(
+                0f,
+                tween(durationMillis = duration, easing = FastOutSlowInEasing),
+            )
+        }
+    }
+
+    Text(
+        text = score,
+        modifier =
+            modifier
+                .onGloballyPositioned { coordinates ->
+                    val pos = coordinates.positionInWindow()
+                    elemCenter.value = Offset(pos.x + coordinates.size.width / 2f, pos.y + coordinates.size.height / 2f)
+                }.graphicsLayer {
+                    translationX = transXAnim.value
+                    translationY = transYAnim.value
+                    scaleX = scaleAnim.value
+                    scaleY = scaleAnim.value
+                },
+        textAlign = TextAlign.Center,
+        color = Color.White,
+        fontSize = fontSize ?: TextUnit.Unspecified
+    )
 }
