@@ -12,11 +12,11 @@ class TennisPadelViewModel(application: Application): BaseViewModel(application)
     private var lastPointScoring = emptyList<Int>()
     private var setServeStarer = 0
 
-    override fun startNewGame() {
+    override fun startNewGame(sets: Int) {
         _ongoingSetResults.value = listOf()
         lastPointScoring = emptyList()
         setServeStarer = 0
-        super.startNewGame()
+        super.startNewGame(sets)
     }
 
     private fun checkIfPointIsWon(): Int? {

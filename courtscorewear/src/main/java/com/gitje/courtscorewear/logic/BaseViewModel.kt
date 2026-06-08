@@ -29,10 +29,6 @@ abstract class BaseViewModel(
 
     protected var setsToPlay = 0
 
-    fun configureSetsToPlay(sets: Int) {
-        setsToPlay = sets
-    }
-
     fun setServingTeam(server: Int) {
         _servingTeam.value = server
     }
@@ -58,11 +54,12 @@ abstract class BaseViewModel(
         }
     }
 
-    open fun startNewGame() {
+    open fun startNewGame(sets: Int) {
         ongoingScoring.clear()
         _wonTeam.value = 0
         _servingTeam.value = 0
         _team1SetResults.value = mutableListOf()
         _team2SetResults.value = mutableListOf()
+        setsToPlay = sets
     }
 }

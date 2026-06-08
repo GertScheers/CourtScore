@@ -90,10 +90,10 @@ fun WearApp() {
                             if (currentGameType == GameType.Tennis ||
                                 currentGameType == GameType.Padel
                             ) {
-                                tennisPadelViewModel.configureSetsToPlay(sets)
+                                tennisPadelViewModel.startNewGame(sets)
                                 navController.navigate("tennisPadelGameScreen")
                             } else {
-                                badmintonViewModel.configureSetsToPlay(sets)
+                                badmintonViewModel.startNewGame(sets)
                                 navController.navigate("badmintonGameScreen")
                             }
                         }
@@ -108,8 +108,7 @@ fun WearApp() {
                                 .background(MaterialTheme.colors.background),
                         contentAlignment = Alignment.Center,
                     ) {
-                        tennisPadelViewModel.startNewGame()
-                        TennisPadelGameScreen(currentGameType!!) {
+                        TennisPadelGameScreen(currentGameType) {
                             navController.popBackStack(route = "sports_choice", false)
                         }
                     }
@@ -123,7 +122,6 @@ fun WearApp() {
                                 .background(MaterialTheme.colors.background),
                         contentAlignment = Alignment.Center,
                     ) {
-                        badmintonViewModel.startNewGame()
                         BadmintonGameScreen {
                             navController.popBackStack(route = "sports_choice", false)
                         }
