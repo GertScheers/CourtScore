@@ -40,6 +40,7 @@ import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
 import com.gitje.courtscorewear.logic.BadmintonViewModel
@@ -84,6 +85,7 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
         prevTeam2 = newT2
     }
 
+    TimeText()
     if (wonTeam == 0) {
         if (servingTeam == 0) {
             ServerPickerScreen {
@@ -139,7 +141,7 @@ fun BadmintonScoringUI(
                 rootCenter = Offset(position.x + coordinates.size.width / 2f, position.y + coordinates.size.height / 2f)
             },
     ) {
-        Column {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Column(
                 modifier =
                     Modifier
@@ -152,7 +154,7 @@ fun BadmintonScoringUI(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text("Team 1")
+                Text("Opponent")
                 Row(Modifier.fillMaxWidth(0.7f)) {
                     if (servingTeam == 1) {
                         Row(
@@ -228,7 +230,7 @@ fun BadmintonScoringUI(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text("Team 2")
+                Text("You")
                 Row(Modifier.fillMaxWidth(0.7f)) {
                     if (servingTeam == 2) {
                         Row(

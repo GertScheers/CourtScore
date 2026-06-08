@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +32,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
 import com.gitje.courtscorewear.logic.TennisPadelViewModel
@@ -79,7 +80,7 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
             }
         )
     }
-
+    TimeText()
     if (wonTeam == 0) {
         if (servingTeam == 0) {
             ServerPickerScreen {
@@ -144,7 +145,8 @@ fun TennisPadelScoringUI(
                     position.y + coordinates.size.height / 2f
                 )
             },
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         Column(
             modifier = Modifier
@@ -161,7 +163,7 @@ fun TennisPadelScoringUI(
             Box {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Row {
-                        Text("Team 1")
+                        Text("Opponent")
                         if (servingPlayer == 1) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(gameIcon),
@@ -209,7 +211,7 @@ fun TennisPadelScoringUI(
             Box {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Row {
-                        Text("Team 2")
+                        Text("You")
                         if (servingPlayer == 2) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(gameIcon),
