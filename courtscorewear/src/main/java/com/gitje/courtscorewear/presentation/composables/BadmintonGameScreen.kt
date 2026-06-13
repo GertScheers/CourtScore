@@ -1,8 +1,5 @@
 package com.gitje.courtscorewear.presentation.composables
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,8 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,9 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -36,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
@@ -45,7 +43,6 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
 import com.gitje.courtscorewear.logic.BadmintonViewModel
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -92,25 +89,45 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
                 badmintonViewModel.setServingTeam(it)
             }
         } else {
-            Box(Modifier.fillMaxHeight(0.8f)) {
-                BadmintonScoringUI(
-                    servingTeam,
-                    team1Score,
-                    team2Score,
-                    team1SetHistory,
-                    team2SetHistory,
-                    teamScored = { badmintonViewModel.teamScored(it) },
-                    popTriggerTeam1 = animationTriggerTeam1,
-                    popTriggerTeam2 = animationTriggerTeam2,
-                )
+            var watchWidth by remember { mutableStateOf(0.dp) }
 
-                CompactButton(
-                    {
-                        badmintonViewModel.undoLastScore()
-                    },
-                    Modifier.align(alignment = Alignment.CenterStart),
+            Box(modifier = Modifier.fillMaxHeight(0.8f).onGloballyPositioned {
+                watchWidth = it.size.width.dp
+            }) {
+                Box {
+                    BadmintonScoringUI(
+                        servingTeam,
+                        team1Score,
+                        team2Score,
+                        team1SetHistory,
+                        team2SetHistory,
+                        teamScored = { badmintonViewModel.teamScored(it) },
+                        popTriggerTeam1 = animationTriggerTeam1,
+                        popTriggerTeam2 = animationTriggerTeam2,
+                    )
+                }
+
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .offset(x = ((-watchWidth/4)-10.dp).value.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_undo), null)
+                    Box(
+                        Modifier
+                            .clip(CircleShape)
+                            .size(130.dp)
+                            .background(MaterialTheme.colors.primary)
+                            .padding(end = 15.dp)
+                            .clickable(onClick = { badmintonViewModel.undoLastScore() })
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_undo),
+                            null,
+                            tint = Color.Black,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
+                    }
                 }
             }
         }
@@ -138,7 +155,10 @@ fun BadmintonScoringUI(
             .fillMaxSize()
             .onGloballyPositioned { coordinates ->
                 val position = coordinates.positionInWindow()
-                rootCenter = Offset(position.x + coordinates.size.width / 2f, position.y + coordinates.size.height / 2f)
+                rootCenter = Offset(
+                    position.x + coordinates.size.width / 2f,
+                    position.y + coordinates.size.height / 2f
+                )
             },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
