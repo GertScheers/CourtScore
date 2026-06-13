@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -80,37 +83,61 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
             }
         )
     }
+
     TimeText()
+
     if (wonTeam == 0) {
         if (servingTeam == 0) {
             ServerPickerScreen {
                 viewModel.setServingTeam(it)
             }
         } else {
-            Box(Modifier.fillMaxHeight(0.8f)) {
-                //Tennis-Padel UI
-                TennisPadelScoringUI(
-                    servingPlayer = servingTeam,
-                    gameIcon = vector,
-                    team1CurrentPointScore = team1Score,
-                    team2CurrentPointScore = team2Score,
-                    team1CurrentSetScore = team1SetScore,
-                    team2CurrentSetScore = team2SetScore,
-                    team1SetHistory = team1SetHistory,
-                    team2SetHistory = team2SetHistory,
-                    popTriggerTeam1 = animationTriggerTeam1,
-                    popTriggerTeam2 = animationTriggerTeam2
-                ) {
-                    viewModel.teamScored(it)
+            var watchWidth by remember { mutableStateOf(0.dp) }
+
+            Box(modifier = Modifier
+                .fillMaxHeight(0.8f)
+                .onGloballyPositioned {
+                    watchWidth = it.size.width.dp
+                }) {
+                Box {
+                    //Tennis-Padel UI
+                    TennisPadelScoringUI(
+                        servingPlayer = servingTeam,
+                        gameIcon = vector,
+                        team1CurrentPointScore = team1Score,
+                        team2CurrentPointScore = team2Score,
+                        team1CurrentSetScore = team1SetScore,
+                        team2CurrentSetScore = team2SetScore,
+                        team1SetHistory = team1SetHistory,
+                        team2SetHistory = team2SetHistory,
+                        popTriggerTeam1 = animationTriggerTeam1,
+                        popTriggerTeam2 = animationTriggerTeam2
+                    ) {
+                        viewModel.teamScored(it)
+                    }
                 }
 
-                CompactButton(
-                    {
-                        viewModel.undoLastScore()
-                    },
-                    Modifier.align(alignment = Alignment.CenterStart)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .offset(x = ((-watchWidth / 4) - 10.dp).value.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = ImageVector.vectorResource(R.drawable.ic_undo), null)
+                    Box(
+                        Modifier
+                            .clip(CircleShape)
+                            .size(130.dp)
+                            .background(MaterialTheme.colors.primary)
+                            .padding(end = 15.dp)
+                            .clickable(onClick = { viewModel.undoLastScore() })
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_undo),
+                            null,
+                            tint = Color.Black,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
+                    }
                 }
             }
         }
