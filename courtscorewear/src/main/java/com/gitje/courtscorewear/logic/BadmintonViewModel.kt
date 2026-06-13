@@ -39,13 +39,21 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
     override fun undoLastScore() {
         if (ongoingScoring.isNotEmpty())
             ongoingScoring.removeAt(ongoingScoring.size - 1)
-        else if(_team1SetResults.value.count() > 1) {
+        else if(_team1SetResults.value.isNotEmpty()) {
             //Undo won set, fill history with setHistory's values and continue playing 'closed set'
-            //TODO: This needs testing
-            repeat(_team1SetResults.value.last()) {
+            var pointsForTeam1 = _team1SetResults.value.last()
+            var pointsForTeam2 = _team2SetResults.value.last()
+
+            //If someone won the set with '21', set them back to 20
+            if(pointsForTeam1 > pointsForTeam2)
+                pointsForTeam1--
+            else
+                pointsForTeam2--
+
+            repeat(pointsForTeam1) {
                 ongoingScoring.add(1)
             }
-            repeat(_team2SetResults.value.last()) {
+            repeat(pointsForTeam2) {
                 ongoingScoring.add(2)
             }
             _team1SetResults.value.removeAt(_team1SetResults.value.lastIndex)

@@ -5,14 +5,15 @@
 
 package com.gitje.courtscorewear.presentation
 
+import android.content.Context
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,32 +27,48 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.gitje.courtscorewear.logic.BadmintonViewModel
-import com.gitje.courtscorewear.logic.BaseViewModel
 import com.gitje.courtscorewear.logic.TennisPadelViewModel
 import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.composables.BadmintonGameScreen
 import com.gitje.courtscorewear.presentation.composables.SetsChoiceScreen
+import com.gitje.courtscorewear.presentation.composables.SettingsScreen
 import com.gitje.courtscorewear.presentation.composables.SportsChoiceScreen
 import com.gitje.courtscorewear.presentation.composables.TennisPadelGameScreen
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
 import org.koin.androidx.compose.koinViewModel
+import androidx.core.content.edit
+
+const val SETTING_KEEP_SCREEN_ON = "keep_screen_on"
 
 class WearActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPref = getPreferences(MODE_PRIVATE) ?: return
+        val keepScreenOn = sharedPref.getBoolean(SETTING_KEEP_SCREEN_ON, false)
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
+        if (keepScreenOn)
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            WearApp()
+            WearApp(keepScreenOn) {
+                sharedPref.edit {
+                    putBoolean(SETTING_KEEP_SCREEN_ON, it)
+                }
+                recreate()
+            }
         }
     }
 }
 
 @Composable
-fun WearApp() {
+fun WearApp(
+    keepScreenOn: Boolean,
+    changeKeepScreenOn: (Boolean) -> Unit
+) {
     CourtScoreTheme {
         val navController = rememberSwipeDismissableNavController()
         val badmintonViewModel: BadmintonViewModel = koinViewModel()
@@ -64,28 +81,20 @@ fun WearApp() {
                 startDestination = "sports_choice",
             ) {
                 composable("sports_choice") {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        SportsChoiceScreen { gameType ->
-                            currentGameType = gameType
-                            navController.navigate("sets_choice")
-                        }
+                    WearContainer {
+                        SportsChoiceScreen(
+                            navigateToSettings = {
+                                navController.navigate("settings")
+                            },
+                            navigateToGameScreen = { gameType ->
+                                currentGameType = gameType
+                                navController.navigate("sets_choice")
+                            })
                     }
                 }
 
                 composable("sets_choice") {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    WearContainer {
                         SetsChoiceScreen { sets ->
                             if (currentGameType == GameType.Tennis ||
                                 currentGameType == GameType.Padel
@@ -101,13 +110,7 @@ fun WearApp() {
                 }
 
                 composable("tennisPadelGameScreen") {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    WearContainer {
                         TennisPadelGameScreen(currentGameType) {
                             navController.popBackStack(route = "sports_choice", false)
                         }
@@ -115,19 +118,32 @@ fun WearApp() {
                 }
 
                 composable("badmintonGameScreen") {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colors.background),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    WearContainer {
                         BadmintonGameScreen {
                             navController.popBackStack(route = "sports_choice", false)
                         }
                     }
                 }
+
+                composable("settings") {
+                    WearContainer {
+                        SettingsScreen(keepScreenOn, changeKeepScreenOn)
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun WearContainer(content: @Composable () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
     }
 }

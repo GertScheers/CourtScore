@@ -16,6 +16,7 @@ wearToolingPreview = "1.0.0"
 coreSplashscreen = "1.0.1"
 composeNavigation = "1.5.6"
 composeNavigationVersion = "1.5.6"
+composeMaterial3 = "1.6.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "composeNavigationVersion" }
 koin = { group = "io.insert-koin", name="koin-androidx-compose", version = "4.2.0"}
+compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
