@@ -5,7 +5,6 @@
 
 package com.gitje.courtscorewear.presentation
 
-import android.content.Context
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -54,96 +53,112 @@ class WearActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            WearApp(keepScreenOn) {
-                sharedPref.edit {
-                    putBoolean(SETTING_KEEP_SCREEN_ON, it)
+            WearApp(
+                keepScreenOn,
+                changeKeepScreenOn = {
+                    sharedPref.edit {
+                        putBoolean(SETTING_KEEP_SCREEN_ON, it)
+                    }
+                    recreate()
+                },
+                changeTeam1Color = {
+
+                },
+                changeTeam2Color = {
+
                 }
-                recreate()
-            }
+            )
         }
     }
-}
 
-@Composable
-fun WearApp(
-    keepScreenOn: Boolean,
-    changeKeepScreenOn: (Boolean) -> Unit
-) {
-    CourtScoreTheme {
-        val navController = rememberSwipeDismissableNavController()
-        val badmintonViewModel: BadmintonViewModel = koinViewModel()
-        val tennisPadelViewModel: TennisPadelViewModel = koinViewModel()
-        var currentGameType by remember { mutableStateOf(GameType.Tennis) }
+    @Composable
+    fun WearApp(
+        keepScreenOn: Boolean,
+        changeKeepScreenOn: (Boolean) -> Unit,
+        changeTeam1Color: (String) -> Unit,
+        changeTeam2Color: (String) -> Unit
+    ) {
+        CourtScoreTheme {
+            val navController = rememberSwipeDismissableNavController()
+            val badmintonViewModel: BadmintonViewModel = koinViewModel()
+            val tennisPadelViewModel: TennisPadelViewModel = koinViewModel()
+            var currentGameType by remember { mutableStateOf(GameType.Tennis) }
 
-        Scaffold {
-            SwipeDismissableNavHost(
-                navController = navController,
-                startDestination = "sports_choice",
-            ) {
-                composable("sports_choice") {
-                    WearContainer {
-                        SportsChoiceScreen(
-                            navigateToSettings = {
-                                navController.navigate("settings")
-                            },
-                            navigateToGameScreen = { gameType ->
-                                currentGameType = gameType
-                                navController.navigate("sets_choice")
-                            })
+            Scaffold {
+                SwipeDismissableNavHost(
+                    navController = navController,
+                    startDestination = "sports_choice",
+                ) {
+                    composable("sports_choice") {
+                        WearContainer {
+                            SportsChoiceScreen(
+                                navigateToSettings = {
+                                    navController.navigate("settings")
+                                },
+                                navigateToGameScreen = { gameType ->
+                                    currentGameType = gameType
+                                    navController.navigate("sets_choice")
+                                })
+                        }
                     }
-                }
 
-                composable("sets_choice") {
-                    WearContainer {
-                        SetsChoiceScreen { sets ->
-                            if (currentGameType == GameType.Tennis ||
-                                currentGameType == GameType.Padel
-                            ) {
-                                tennisPadelViewModel.startNewGame(sets)
-                                navController.navigate("tennisPadelGameScreen")
-                            } else {
-                                badmintonViewModel.startNewGame(sets)
-                                navController.navigate("badmintonGameScreen")
+                    composable("sets_choice") {
+                        WearContainer {
+                            SetsChoiceScreen { sets ->
+                                if (currentGameType == GameType.Tennis ||
+                                    currentGameType == GameType.Padel
+                                ) {
+                                    tennisPadelViewModel.startNewGame(sets)
+                                    navController.navigate("tennisPadelGameScreen")
+                                } else {
+                                    badmintonViewModel.startNewGame(sets)
+                                    navController.navigate("badmintonGameScreen")
+                                }
                             }
                         }
                     }
-                }
 
-                composable("tennisPadelGameScreen") {
-                    WearContainer {
-                        TennisPadelGameScreen(currentGameType) {
-                            navController.popBackStack(route = "sports_choice", false)
+                    composable("tennisPadelGameScreen") {
+                        WearContainer {
+                            TennisPadelGameScreen(currentGameType) {
+                                navController.popBackStack(route = "sports_choice", false)
+                            }
                         }
                     }
-                }
 
-                composable("badmintonGameScreen") {
-                    WearContainer {
-                        BadmintonGameScreen {
-                            navController.popBackStack(route = "sports_choice", false)
+                    composable("badmintonGameScreen") {
+                        WearContainer {
+                            BadmintonGameScreen {
+                                navController.popBackStack(route = "sports_choice", false)
+                            }
                         }
                     }
-                }
 
-                composable("settings") {
-                    WearContainer {
-                        SettingsScreen(keepScreenOn, changeKeepScreenOn)
+                    composable("settings") {
+                        WearContainer {
+                            SettingsScreen(
+                                keepScreenOn,
+                                changeKeepScreenOn,
+                                changeTeam1Color,
+                                changeTeam2Color
+                            )
+                        }
                     }
                 }
             }
         }
     }
-}
 
-@Composable
-private fun WearContainer(content: @Composable () -> Unit) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background),
-        contentAlignment = Alignment.Center,
-    ) {
-        content()
+    @Composable
+    private fun WearContainer(content: @Composable () -> Unit) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colors.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            content()
+        }
     }
 }
