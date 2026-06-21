@@ -1,5 +1,6 @@
 package com.gitje.courtscorewear.presentation.composables
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -33,23 +35,37 @@ import androidx.wear.compose.material.SplitToggleChip
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.SplitSwitchButton
 import androidx.wear.compose.material3.Text
+import com.gitje.courtscorewear.logic.SettingsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SettingsScreen(
-    keepScreenOn: Boolean,
-    changeKeepScreenOn: (Boolean) -> Unit,
-    changeTeam1Color: (String) -> Unit,
-    changeTeam2Color: (String) -> Unit
+    recreateActivity: () -> Unit
 ) {
     var showColorSelector by remember { mutableStateOf(Pair(false, 0)) }
+    val viewModel: SettingsViewModel = koinViewModel()
+
+    val keepScreenOn by remember { mutableStateOf(viewModel.getKeepScreenOn()) }
+    var team1Color by remember { mutableStateOf(viewModel.getTeam1Color()) }
+    var team2Color by remember { mutableStateOf(viewModel.getTeam2Color()) }
+
+    BackHandler(enabled = showColorSelector.first) {
+        showColorSelector = Pair(false, 0)
+    }
 
     ScalingLazyColumn(anchorType = ScalingLazyListAnchorType.ItemStart) {
         item {
             SplitSwitchButton(
-                keepScreenOn,
-                onCheckedChange = { changeKeepScreenOn(it) },
+                checked = keepScreenOn,
+                onCheckedChange = {
+                    viewModel.setKeepScreenOn(it)
+                    recreateActivity()
+                },
                 toggleContentDescription = "Keep screen on",
-                onContainerClick = { changeKeepScreenOn(!keepScreenOn) },
+                onContainerClick = {
+                    viewModel.setKeepScreenOn(!keepScreenOn)
+                    recreateActivity()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Keep screen on")
@@ -67,7 +83,7 @@ fun SettingsScreen(
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(Color.Red)
+                            .background(Color(("#$team1Color").toColorInt()))
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -77,15 +93,15 @@ fun SettingsScreen(
         item {
             SplitToggleChip(
                 true,
-                { showColorSelector = Pair(true, 2) },
+                { },
                 label = { Text("Team 2 Color") },
-                onClick = { },
+                onClick = { showColorSelector = Pair(true, 2) },
                 contentPadding = PaddingValues(start = 14.dp),
                 toggleControl = {
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(Color.Blue)
+                            .background(Color(("#$team2Color").toColorInt()))
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -96,9 +112,13 @@ fun SettingsScreen(
     if (showColorSelector.first) {
         ColorSelector {
             if (showColorSelector.second == 1) {
-                changeTeam1Color(it)
+                viewModel.setTeam1Color(it)
+                team1Color = it
+                showColorSelector = Pair(false, 0)
             } else if (showColorSelector.second == 2) {
-                changeTeam2Color(it)
+                viewModel.setTeam2Color(it)
+                team2Color = it
+                showColorSelector = Pair(false, 0)
             }
         }
     }
@@ -109,17 +129,25 @@ fun ColorSelector(colorSelected: (String) -> Unit) {
     // Partition items into rows of columnsPerRow
     val colors = remember {
         listOf(
-            Color.Blue,
-            Color.Red,
-            Color.Green,
-            Color.Black,
-            Color.LightGray,
-            Color.Magenta,
-            Color.Cyan,
-            Color.Yellow,
-            Color.White,
-            Color.DarkGray,
-            Color.Gray
+            "#FF0000", //Red
+            "#00FF00", //Lime
+            "#0000FF", //Blue
+            "#FFFF00", //Yellow
+            "#00FFFF", //Cyan
+            "#FF00FF", //Magenta
+            "#000000", //Black
+            "#333333", //Dark Gray
+            "#808080", //Gray
+            "#EFEFEF", //Light Gray
+            "#FFFFFF", //White
+            "#FFA500", //Orange
+            "#000080", //Navy
+            "#008000", //Green
+            "#008080", //Teal
+            "#800080", //Purple
+            "#800000", //Maroon
+            "#FFD700", //Gold
+            "#FFC0CB" //Pink
         )
     }
     // Partition into rows alternating 1,2,1,2...
@@ -129,15 +157,15 @@ fun ColorSelector(colorSelected: (String) -> Unit) {
         var wantSingle = true
         while (i < colors.size) {
             if (wantSingle) {
-                r.add(listOf(colors[i]))
+                r.add(listOf(Color(colors[i].toColorInt())))
                 i += 1
             } else {
                 if (i + 1 < colors.size) {
-                    r.add(listOf(colors[i], colors[i + 1]))
+                    r.add(listOf(Color(colors[i].toColorInt()), Color(colors[i + 1].toColorInt())))
                     i += 2
                 } else {
                     // not enough left for a pair -> add a spacer
-                    r.add(listOf(colors[i], null))
+                    r.add(listOf(Color(colors[i].toColorInt()), null))
                     i += 1
                 }
             }

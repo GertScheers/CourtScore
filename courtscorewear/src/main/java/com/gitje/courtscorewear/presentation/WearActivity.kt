@@ -26,6 +26,7 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.gitje.courtscorewear.logic.BadmintonViewModel
+import com.gitje.courtscorewear.logic.SETTING_KEEP_SCREEN_ON
 import com.gitje.courtscorewear.logic.TennisPadelViewModel
 import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.composables.BadmintonGameScreen
@@ -35,13 +36,10 @@ import com.gitje.courtscorewear.presentation.composables.SportsChoiceScreen
 import com.gitje.courtscorewear.presentation.composables.TennisPadelGameScreen
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
 import org.koin.androidx.compose.koinViewModel
-import androidx.core.content.edit
-
-const val SETTING_KEEP_SCREEN_ON = "keep_screen_on"
 
 class WearActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPref = getPreferences(MODE_PRIVATE) ?: return
+        val sharedPref = getSharedPreferences("default", MODE_PRIVATE) ?: return
         val keepScreenOn = sharedPref.getBoolean(SETTING_KEEP_SCREEN_ON, false)
         installSplashScreen()
 
@@ -54,30 +52,14 @@ class WearActivity : ComponentActivity() {
 
         setContent {
             WearApp(
-                keepScreenOn,
-                changeKeepScreenOn = {
-                    sharedPref.edit {
-                        putBoolean(SETTING_KEEP_SCREEN_ON, it)
-                    }
+                {
                     recreate()
-                },
-                changeTeam1Color = {
-
-                },
-                changeTeam2Color = {
-
-                }
-            )
+                })
         }
     }
 
     @Composable
-    fun WearApp(
-        keepScreenOn: Boolean,
-        changeKeepScreenOn: (Boolean) -> Unit,
-        changeTeam1Color: (String) -> Unit,
-        changeTeam2Color: (String) -> Unit
-    ) {
+    fun WearApp(recreateActivity: () -> Unit) {
         CourtScoreTheme {
             val navController = rememberSwipeDismissableNavController()
             val badmintonViewModel: BadmintonViewModel = koinViewModel()
@@ -136,12 +118,7 @@ class WearActivity : ComponentActivity() {
 
                     composable("settings") {
                         WearContainer {
-                            SettingsScreen(
-                                keepScreenOn,
-                                changeKeepScreenOn,
-                                changeTeam1Color,
-                                changeTeam2Color
-                            )
+                            SettingsScreen(recreateActivity)
                         }
                     }
                 }
