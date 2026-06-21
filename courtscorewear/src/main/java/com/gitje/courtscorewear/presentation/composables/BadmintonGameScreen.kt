@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
@@ -99,6 +101,8 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
                         servingTeam,
                         team1Score,
                         team2Score,
+                        badmintonViewModel.getTeam1Color(),
+                        badmintonViewModel.getTeam2Color(),
                         team1SetHistory,
                         team2SetHistory,
                         teamScored = { badmintonViewModel.teamScored(it) },
@@ -141,6 +145,8 @@ fun BadmintonScoringUI(
     servingTeam: Int,
     team1Score: Int,
     team2Score: Int,
+    team1Color: String,
+    team2Color: String,
     team1SetHistory: List<Int>,
     team2SetHistory: List<Int>,
     teamScored: (Int) -> Unit,
@@ -166,7 +172,7 @@ fun BadmintonScoringUI(
                 modifier =
                     Modifier
                         .weight(0.7f)
-                        .background(Color.Red.copy(0.5f))
+                        .background(Color(("#$team1Color").toColorInt()).copy(0.5f))
                         .fillMaxWidth()
                         .clickable(onClick = {
                             teamScored(1)
@@ -243,7 +249,7 @@ fun BadmintonScoringUI(
                     Modifier
                         .weight(0.7f)
                         .fillMaxWidth()
-                        .background(Color.Blue.copy(0.5f))
+                        .background(Color(("#$team2Color").toColorInt()).copy(0.5f))
                         .clickable(onClick = {
                             teamScored(2)
                         }),
@@ -353,6 +359,8 @@ fun BadmintonScoringUIPreview() {
                 1,
                 12,
                 9,
+                Color.Red.toArgb().toHexString(),
+                Color.Blue.toArgb().toHexString(),
                 listOf(21, 21),
                 team2SetHistory = listOf(16, 18),
                 teamScored = { },

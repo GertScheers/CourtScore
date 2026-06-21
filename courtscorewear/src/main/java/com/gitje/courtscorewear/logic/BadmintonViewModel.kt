@@ -1,9 +1,15 @@
 package com.gitje.courtscorewear.logic
 
 import android.app.Application
+import android.content.SharedPreferences
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import kotlin.collections.isNotEmpty
 
-class BadmintonViewModel(application: Application) : BaseViewModel(application) {
+class BadmintonViewModel(
+    application: Application,
+    val sharedPreferences: SharedPreferences
+) : BaseViewModel(application) {
     override fun teamScored(player: Int) {
         ongoingScoring.add(player)
 
@@ -39,13 +45,13 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
     override fun undoLastScore() {
         if (ongoingScoring.isNotEmpty())
             ongoingScoring.removeAt(ongoingScoring.size - 1)
-        else if(_team1SetResults.value.isNotEmpty()) {
+        else if (_team1SetResults.value.isNotEmpty()) {
             //Undo won set, fill history with setHistory's values and continue playing 'closed set'
             var pointsForTeam1 = _team1SetResults.value.last()
             var pointsForTeam2 = _team2SetResults.value.last()
 
             //If someone won the set with '21', set them back to 20
-            if(pointsForTeam1 > pointsForTeam2)
+            if (pointsForTeam1 > pointsForTeam2)
                 pointsForTeam1--
             else
                 pointsForTeam2--
@@ -59,5 +65,13 @@ class BadmintonViewModel(application: Application) : BaseViewModel(application) 
             _team1SetResults.value.removeAt(_team1SetResults.value.lastIndex)
             _team2SetResults.value.removeAt(_team2SetResults.value.lastIndex)
         }
+    }
+
+    fun getTeam1Color(): String {
+        return sharedPreferences.getString(SETTING_TEAM_1_COLOR, Color.Red.toArgb().toHexString()) ?: Color.Red.toArgb().toHexString()
+    }
+
+    fun getTeam2Color(): String {
+        return sharedPreferences.getString(SETTING_TEAM_2_COLOR, Color.Blue.toArgb().toHexString()) ?: Color.Blue.toArgb().toHexString()
     }
 }

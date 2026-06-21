@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
@@ -111,7 +113,9 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
                         team1SetHistory = team1SetHistory,
                         team2SetHistory = team2SetHistory,
                         popTriggerTeam1 = animationTriggerTeam1,
-                        popTriggerTeam2 = animationTriggerTeam2
+                        popTriggerTeam2 = animationTriggerTeam2,
+                        viewModel.getTeam1Color(),
+                        viewModel.getTeam2Color()
                     ) {
                         viewModel.teamScored(it)
                     }
@@ -158,6 +162,8 @@ fun TennisPadelScoringUI(
     team2SetHistory: List<Int>,
     popTriggerTeam1: Int,
     popTriggerTeam2: Int,
+    team1Color: String,
+    team2Color: String,
     teamScored: (Int) -> Unit
 ) {
     var rootCenter by remember { mutableStateOf(Offset.Zero) }
@@ -178,7 +184,7 @@ fun TennisPadelScoringUI(
         Column(
             modifier = Modifier
                 .weight(0.7f)
-                .background(Color.Red.copy(0.5f))
+                .background(Color(("#$team1Color").toColorInt()).copy(0.5f))
                 .fillMaxWidth()
                 .clickable(onClick = {
                     //Score for top team
@@ -227,7 +233,7 @@ fun TennisPadelScoringUI(
             modifier = Modifier
                 .weight(0.7f)
                 .fillMaxWidth()
-                .background(Color.Blue.copy(0.5f))
+                .background(Color(("#$team2Color").toColorInt()).copy(0.5f))
                 .clickable(onClick = {
                     //Score for down team
                     teamScored(2)
@@ -293,7 +299,9 @@ fun TennisPadelPadelScoringUIPreview() {
                 listOf(3, 2),
                 listOf(6, 6),
                 popTriggerTeam1 = 0,
-                popTriggerTeam2 = 0
+                popTriggerTeam2 = 0,
+                Color.Red.toArgb().toHexString(),
+                Color.Blue.toArgb().toHexString()
             ) { }
         }
     }
