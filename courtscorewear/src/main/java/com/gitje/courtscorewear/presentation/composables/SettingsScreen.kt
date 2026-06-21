@@ -126,7 +126,6 @@ fun SettingsScreen(
 
 @Composable
 fun ColorSelector(colorSelected: (String) -> Unit) {
-    // Partition items into rows of columnsPerRow
     val colors = remember {
         listOf(
             "#FF0000", //Red
@@ -196,14 +195,13 @@ fun ColorSelector(colorSelected: (String) -> Unit) {
                     horizontalArrangement = if (isSingle) Arrangement.Center else Arrangement.SpaceBetween
                 ) {
                     if (isSingle) {
-                        // center single item
                         Box(
                             Modifier
                                 .size(50.dp)
                                 .background(
-                                    rowItems[0]!!,
+                                    rowItems[0]!!,//Singles should never be empty
                                     CircleShape
-                                )//Singles should never be empty
+                                )
                                 .border(BorderStroke(3.dp, Color.White), CircleShape)
                                 .clickable(onClick = {
                                     colorSelected(
@@ -217,9 +215,9 @@ fun ColorSelector(colorSelected: (String) -> Unit) {
                                 .size(50.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    rowItems[0]!!,
+                                    rowItems[0]!!,//First one should never be empty
                                     CircleShape
-                                )//First one should never be empty
+                                )
                                 .border(BorderStroke(3.dp, Color.White), CircleShape)
                                 .clickable(onClick = {
                                     colorSelected(
@@ -227,6 +225,7 @@ fun ColorSelector(colorSelected: (String) -> Unit) {
                                     )
                                 })
                         )
+                        //2nd is either color item or spacer
                         rowItems[1]?.let { rowItem ->
                             Box(
                                 Modifier
