@@ -1,5 +1,6 @@
 package com.gitje.courtscorewear.presentation.composables
 
+import android.Manifest
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,15 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
@@ -29,9 +29,30 @@ import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
 import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SportsChoiceScreen(navigateToSettings: () -> Unit,navigateToGameScreen: (GameType) -> Unit) {
+    val permissionState = rememberPermissionState(
+        permission = Manifest.permission.BODY_SENSORS,
+        onPermissionResult = { granted ->
+            if (!granted) {
+                println("TEST Permission missing")
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        if (permissionState.status.isGranted) {
+            // do something
+        } else {
+            permissionState.launchPermissionRequest()
+        }
+    }
+
     Column(
         Modifier
             .verticalScroll(rememberScrollState())

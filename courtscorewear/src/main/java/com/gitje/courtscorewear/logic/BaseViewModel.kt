@@ -3,12 +3,17 @@ package com.gitje.courtscorewear.logic
 import android.app.Application
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
-import com.gitje.courtscorewear.models.GameType
+import androidx.lifecycle.viewModelScope
+import com.gitje.courtscorewear.util.HealthServicesManager
+import com.gitje.courtscorewear.util.MeasureMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 abstract class BaseViewModel(
     application: Application,
+    val healthServicesManager: HealthServicesManager
 ) : AndroidViewModel(application) {
     abstract fun teamScored(player: Int)
     abstract fun checkIfSetIsWon(): Int?
@@ -26,8 +31,18 @@ abstract class BaseViewModel(
     val wonTeam: StateFlow<Int> = _wonTeam
     protected var _servingTeam = MutableStateFlow(0)
     val servingTeam: StateFlow<Int> = _servingTeam
+    protected var _heartRate = MutableStateFlow(0.0)
+    val heartRate: StateFlow<Double> = _heartRate
 
     protected var setsToPlay = 0
+
+    init {
+        viewModelScope.launch {
+            if (healthServicesManager.hasHeartRateCapability()) {
+                startMonitoringHealthServices()
+            }
+        }
+    }
 
     fun setServingTeam(server: Int) {
         _servingTeam.value = server
@@ -61,5 +76,21 @@ abstract class BaseViewModel(
         _team1SetResults.value = mutableListOf()
         _team2SetResults.value = mutableListOf()
         setsToPlay = sets
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun startMonitoringHealthServices() {
+        healthServicesManager
+            .heartRateMeasureFlow()
+            .collect { measureMessage ->
+                when (measureMessage) {
+                    is MeasureMessage.MeasureData -> {
+                        val latestHeartRateValue = measureMessage.data.last().value
+                        _heartRate.value = latestHeartRateValue
+                    }
+
+                    else -> { }
+                }
+            }
     }
 }

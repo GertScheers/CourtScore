@@ -43,6 +43,9 @@ androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscree
 androidx-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "composeNavigationVersion" }
 koin = { group = "io.insert-koin", name="koin-androidx-compose", version = "4.2.0"}
 compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+health-services = { group = "androidx.health", name = "health-services-client", version = "1.1.0-rc02" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version = "0.37.3" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

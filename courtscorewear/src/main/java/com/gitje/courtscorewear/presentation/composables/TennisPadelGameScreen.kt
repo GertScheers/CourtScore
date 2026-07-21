@@ -60,6 +60,7 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
     val ongoingSetResults by viewModel.ongoingSetResults.collectAsState()
     val team1SetHistory by viewModel.team1SetResults.collectAsState()
     val team2SetHistory by viewModel.team2SetResults.collectAsState()
+    val heartRate by viewModel.heartRate.collectAsState()
 
     var team1Score by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.count { it == 1 }) }
     var team2Score by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.count { it == 2 }) }
@@ -97,11 +98,10 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
             var watchWidth by remember { mutableStateOf(0.dp) }
 
             Box(modifier = Modifier
-                .fillMaxHeight(0.8f)
                 .onGloballyPositioned {
                     watchWidth = it.size.width.dp
                 }) {
-                Box {
+                Box(Modifier.fillMaxHeight(0.8f).align(Alignment.Center)) {
                     //Tennis-Padel UI
                     TennisPadelScoringUI(
                         servingPlayer = servingTeam,
@@ -143,6 +143,8 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
                         )
                     }
                 }
+                if(heartRate > 0)
+                    HeartRateDisplay(heartRate, Modifier.align(Alignment.BottomCenter))
             }
         }
     } else {

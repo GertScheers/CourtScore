@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +58,7 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
     val servingTeam by badmintonViewModel.servingTeam.collectAsState()
     val team1SetHistory by badmintonViewModel.team1SetResults.collectAsState()
     val team2SetHistory by badmintonViewModel.team2SetResults.collectAsState()
+    val heartRate by badmintonViewModel.heartRate.collectAsState()
 
     val team1Score = ongoingScoring.count { it == 1 }
     val team2Score = ongoingScoring.count { it == 2 }
@@ -93,10 +96,10 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
         } else {
             var watchWidth by remember { mutableStateOf(0.dp) }
 
-            Box(modifier = Modifier.fillMaxHeight(0.8f).onGloballyPositioned {
+            Box(modifier = Modifier.onGloballyPositioned {
                 watchWidth = it.size.width.dp
             }) {
-                Box {
+                Box(Modifier.align(Alignment.Center).fillMaxHeight(0.8f)) {
                     BadmintonScoringUI(
                         servingTeam,
                         team1Score,
@@ -133,6 +136,8 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
                         )
                     }
                 }
+                if(heartRate > 0)
+                    HeartRateDisplay(heartRate, Modifier.align(Alignment.BottomCenter))
             }
         }
     } else {

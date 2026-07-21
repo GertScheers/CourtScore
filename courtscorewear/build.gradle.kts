@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.gitje.courtscorewear"
-        minSdk = 29
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.koin)
     implementation(libs.compose.material3)
+    implementation(libs.health.services)
+    implementation(libs.accompanist.permissions)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

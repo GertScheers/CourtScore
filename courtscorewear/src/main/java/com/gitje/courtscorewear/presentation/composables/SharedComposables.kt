@@ -5,7 +5,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -15,14 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
+import com.gitje.courtscorewear.R
 import kotlinx.coroutines.launch
 
 @Composable
@@ -111,4 +119,22 @@ fun AnimatedScoreText(
         color = Color.White,
         fontSize = fontSize ?: TextUnit.Unspecified
     )
+}
+
+
+@Composable
+fun HeartRateDisplay(
+    heartRate: Double,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_heart),
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = Color.Red
+        )
+        Spacer(Modifier.width(8.dp))
+        Text("${heartRate.toInt()}")
+    }
 }

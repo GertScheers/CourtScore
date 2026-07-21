@@ -4,13 +4,15 @@ import android.app.Application
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.gitje.courtscorewear.util.HealthServicesManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class TennisPadelViewModel(
     application: Application,
-    val sharedPreferences: SharedPreferences
-): BaseViewModel(application) {
+    val sharedPreferences: SharedPreferences,
+    healthServicesManager: HealthServicesManager
+): BaseViewModel(application, healthServicesManager) {
     //Stores ongoing set's points
     private var _ongoingSetResults = MutableStateFlow<List<Int>>(listOf())
     val ongoingSetResults: StateFlow<List<Int>> = _ongoingSetResults

@@ -4,12 +4,14 @@ import android.app.Application
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.gitje.courtscorewear.util.HealthServicesManager
 import kotlin.collections.isNotEmpty
 
 class BadmintonViewModel(
     application: Application,
-    val sharedPreferences: SharedPreferences
-) : BaseViewModel(application) {
+    val sharedPreferences: SharedPreferences,
+    healthServicesManager: HealthServicesManager
+) : BaseViewModel(application, healthServicesManager) {
     override fun teamScored(player: Int) {
         ongoingScoring.add(player)
 
