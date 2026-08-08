@@ -4,46 +4,61 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.gitje.courtscore.ui.theme.CourtScoreTheme
 import com.intuit.sdp.R
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -63,49 +78,190 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun <K, V> MutableMap<K, List<V>>.mergeGames(other: Map<K, List<V>>) {
+    for ((key, values) in other) {
+        put(key, getOrDefault(key, emptyList()) + values)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Overview(modifier: Modifier) {
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    val options = Sports.entries.toTypedArray()
     val tennisDummyScores =
         remember { getTennisScoresDummyData().groupBy { it.date.toLocalDate() } }
     val paddleDummyScores =
         remember { getPaddleScoresDummyData().groupBy { it.date.toLocalDate() } }
     val badmintonDummyScores =
         remember { getBadmintonScoresDummyData().groupBy { it.date.toLocalDate() } }
-    val games =
-        remember(selectedIndex) {
-            when (selectedIndex) {
-                Sports.Tennis.ordinal -> tennisDummyScores
-                Sports.Paddle.ordinal -> paddleDummyScores
-                else -> badmintonDummyScores
+    var showBadminton by remember { mutableStateOf(true) }
+    var showTennis by remember { mutableStateOf(true) }
+    var showPaddle by remember { mutableStateOf(true) }
+    var showFilter by remember { mutableStateOf(false) }
+    var showCalendar by remember { mutableStateOf(false) }
+    val filteredGames = remember(showBadminton, showTennis, showPaddle) {
+        val gameHistory = mutableMapOf<LocalDate, List<Game>>()
+        if (showBadminton) gameHistory += badmintonDummyScores
+        if (showPaddle) gameHistory.mergeGames(paddleDummyScores)
+        if (showTennis) gameHistory.mergeGames(tennisDummyScores)
+
+        gameHistory.toSortedMap(reverseOrder())
+    }
+
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val date = Instant.ofEpochMilli(utcTimeMillis)
+                    .atZone(ZoneId.of("UTC")) // DatePicker operates in UTC
+                    .toLocalDate()
+                return filteredGames.entries.map { it.key }.contains(date)
             }
         }
+    )
+
+    val displayGames = remember(datePickerState.selectedDateMillis, filteredGames) {
+        datePickerState.selectedDateMillis?.let { dtm ->
+            val date = Instant.ofEpochMilli(dtm)
+                .atZone(ZoneId.of("UTC"))
+                .toLocalDate()
+            filteredGames.filter { it.key == date }
+        } ?: filteredGames
+    }
+
+    if (showCalendar) {
+        DatePickerDialog(
+            onDismissRequest = { showCalendar = false },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen._10sdp))) {
+                    Text(
+                        if(datePickerState.selectedDateMillis != null) "Clear" else "Cancel",
+                        modifier = Modifier
+                            .padding(
+                                end = dimensionResource(R.dimen._20sdp),
+                                bottom = dimensionResource(R.dimen._10sdp)
+                            )
+                            .clickable(
+                                onClick = {
+                                    datePickerState.selectedDateMillis = null
+                                    showCalendar = false
+                                }
+                            )
+                    )
+                    Text(
+                        "Ok",
+                        modifier = Modifier
+                            .padding(
+                                end = dimensionResource(R.dimen._20sdp),
+                                bottom = dimensionResource(R.dimen._10sdp)
+                            )
+                            .clickable(onClick = { showCalendar = false })
+                    )
+                }
+            }) {
+            DatePicker(
+                datePickerState,
+                showModeToggle = false
+            )
+        }
+    }
 
     Column(modifier.padding(dimensionResource(R.dimen._5sdp))) {
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            options.forEachIndexed { index, label ->
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                    onClick = { selectedIndex = index },
-                    selected = index == selectedIndex
-                ) {
-                    Text(label.name)
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Game history",
+                fontSize = 28.sp,
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen._5sdp))) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_calendar),
+                    contentDescription = "Calendar",
+                    modifier = Modifier.clickable(onClick = { showCalendar = true })
+                )
+                Box {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_filter),
+                        contentDescription = "Filter",
+                        modifier = Modifier.clickable(onClick = { showFilter = true })
+                    )
+
+                    DropdownMenu(
+                        expanded = showFilter,
+                        onDismissRequest = { showFilter = false }) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(showTennis, { showTennis = !showTennis })
+                                    Text("Show tennis")
+                                }
+                            },
+                            onClick = { showTennis = !showTennis },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_tennis),
+                                    contentDescription = "Show tennis"
+                                )
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(showPaddle, { showPaddle = !showPaddle })
+                                    Text("Show paddle")
+                                }
+                            },
+                            onClick = { showPaddle = !showPaddle },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_padel),
+                                    contentDescription = "Show paddle"
+                                )
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(showBadminton, { showBadminton = !showBadminton })
+                                    Text("Show badminton")
+                                }
+                            },
+                            onClick = { showBadminton = !showBadminton },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_badminton),
+                                    contentDescription = "Show badminton"
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
 
-        Spacer(Modifier.height(dimensionResource(R.dimen._10sdp)))
-
         LazyColumn {
-            games.forEach { (date, gamesForDate) ->
+            displayGames.entries.forEachIndexed { index, (date, gamesForDate) ->
                 item {
-                    CollapsibleHeader(date)
+                    CollapsibleHeader(date, index == 0)
                 }
 
-                items(gamesForDate, key = { it.id }) { game ->
+                itemsIndexed(gamesForDate, key = { _, game -> game.id }) { index, game ->
                     if (LocalExpandedState.isExpanded(date)) {
-                        ScoreCard(game)
+                        val cardShape = when (index) {
+                            gamesForDate.size - 1 -> RoundedCornerShape(
+                                bottomStart = 10.dp,
+                                bottomEnd = 10.dp
+                            )
+
+                            else -> RectangleShape
+                        }
+                        ScoreCard(game, cardShape)
+                        if (index != gamesForDate.size - 1)
+                            HorizontalDivider()
                     }
                 }
             }
@@ -114,14 +270,22 @@ fun Overview(modifier: Modifier) {
 }
 
 @Composable
-fun CollapsibleHeader(date: LocalDate) {
+fun CollapsibleHeader(
+    date: LocalDate,
+    expandedByDefault: Boolean
+) {
+    LaunchedEffect(Unit) {
+        LocalExpandedState.toggle(date, expandedByDefault)
+    }
+
     val expanded = LocalExpandedState.isExpanded(date)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { LocalExpandedState.toggle(date) }
+            .padding(top = 16.dp)
+            .clickable { LocalExpandedState.toggle(date) },
+        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -155,9 +319,9 @@ fun formatDateForHeader(date: LocalDate): String {
 object LocalExpandedState {
     private val expandedState = mutableStateMapOf<LocalDate, Boolean>()
 
-    fun toggle(date: LocalDate) {
-        val current = expandedState[date] ?: true
-        expandedState[date] = !current
+    fun toggle(date: LocalDate, expanded: Boolean? = null) {
+        val current = expandedState[date] ?: false
+        expandedState[date] = expanded ?: !current
     }
 
     fun isExpanded(date: LocalDate): Boolean =
@@ -174,8 +338,16 @@ data class Game(
     val sport: Sports
 ) {
     val id: UUID = UUID.randomUUID()
-    fun winOrLoss(): String {
-        return if (winner == PlayerId.P1) "W" else "L"
+
+    @Composable
+    fun getIcon(): ImageVector {
+        return ImageVector.vectorResource(
+            when (sport) {
+                Sports.Tennis -> com.gitje.courtscore.R.drawable.ic_tennis
+                Sports.Paddle -> com.gitje.courtscore.R.drawable.ic_padel
+                else -> com.gitje.courtscore.R.drawable.ic_badminton
+            }
+        )
     }
 }
 
@@ -197,42 +369,52 @@ val gameTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 
 @Composable
-fun ScoreCard(game: Game) {
-    Card(onClick = { }) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(dimensionResource(R.dimen._5sdp)),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(game.date.format(gameTimeFormatter))
-
-            Spacer(Modifier.width(dimensionResource(R.dimen._20sdp)))
-
-            Row(Modifier.weight(1f)) {
-                Column(Modifier.padding(5.dp), horizontalAlignment = Alignment.End) {
-                    Text("You")
-                    HorizontalDivider(Modifier.width(dimensionResource(R.dimen._50sdp)))
-                    Text("Opponent")
+fun ScoreCard(
+    game: Game,
+    cardShape: Shape
+) {
+    Card(onClick = { }, shape = cardShape) {
+        Box {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(R.dimen._5sdp)),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
+                    Text(game.date.format(gameTimeFormatter))
+                    Icon(game.getIcon(), contentDescription = game.sport.name)
                 }
-                game.scoreHistory.groupBy { it.scoreAfter.set }.forEach {
-                    Column(
-                        Modifier.padding(5.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("${it.value.last().scoreAfter.points.first}")
-                        HorizontalDivider(Modifier.width(dimensionResource(R.dimen._10sdp)))
-                        Text("${it.value.last().scoreAfter.points.second}")
+
+                Spacer(Modifier.width(dimensionResource(R.dimen._20sdp)))
+
+                Row(Modifier.weight(1f)) {
+                    Column(Modifier.padding(5.dp), horizontalAlignment = Alignment.End) {
+                        Text("You")
+                        HorizontalDivider(Modifier.width(dimensionResource(R.dimen._50sdp)))
+                        Text("Opponent")
+                    }
+                    game.scoreHistory.groupBy { it.scoreAfter.set }.forEach {
+                        Column(
+                            Modifier.padding(5.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("${it.value.last().scoreAfter.points.first}")
+                            HorizontalDivider(Modifier.width(dimensionResource(R.dimen._10sdp)))
+                            Text("${it.value.last().scoreAfter.points.second}")
+                        }
                     }
                 }
             }
 
-            Text(
-                game.winOrLoss(), modifier = Modifier
-                    .drawBehind {
-                        drawCircle(if (game.winOrLoss() == "W") Color.Green else Color.Red)
-                    }
-                    .padding(dimensionResource(R.dimen._5sdp)))
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .align(Alignment.CenterEnd)
+                    .background(if (game.winner == PlayerId.P1) Color.Green else Color.Red)
+            ) {
+                Text("")
+            }
         }
     }
 }

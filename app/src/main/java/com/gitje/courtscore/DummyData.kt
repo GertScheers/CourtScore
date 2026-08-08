@@ -19,7 +19,7 @@ fun getTennisScoresDummyData(): List<Game> {
             Sports.Tennis
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(3), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(5, 7))
@@ -37,7 +37,7 @@ fun getTennisScoresDummyData(): List<Game> {
             Sports.Tennis
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(2), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(4, 6))
@@ -79,7 +79,7 @@ fun getTennisScoresDummyData(): List<Game> {
             Sports.Tennis
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(2), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(6, 2))
@@ -130,7 +130,7 @@ fun getPaddleScoresDummyData(): List<Game> {
             Sports.Paddle
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(5), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(4, 6))
@@ -144,7 +144,7 @@ fun getPaddleScoresDummyData(): List<Game> {
             Sports.Paddle
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(5), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(1, 6))
@@ -158,7 +158,7 @@ fun getPaddleScoresDummyData(): List<Game> {
             Sports.Paddle
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(12), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(7, 5))
@@ -172,7 +172,7 @@ fun getPaddleScoresDummyData(): List<Game> {
             Sports.Paddle
         ),
         Game(
-            LocalDateTime.now(), listOf(
+            LocalDateTime.now().minusDays(12), listOf(
                 ScoreEvent(
                     Player("Gitje"),
                     ScoreSnapshot(0, Pair(6, 2))
@@ -192,7 +192,7 @@ fun getBadmintonScoresDummyData(): List<Game> {
     return listOf(
         return listOf(
             Game(
-                LocalDateTime.now(), listOf(
+                LocalDateTime.now().minusDays(1), listOf(
                     ScoreEvent(
                         Player("Gitje"),
                         ScoreSnapshot(0, Pair(21, 16))
@@ -206,7 +206,7 @@ fun getBadmintonScoresDummyData(): List<Game> {
                 Sports.Badminton
             ),
             Game(
-                LocalDateTime.now(), listOf(
+                LocalDateTime.now().minusDays(1), listOf(
                     ScoreEvent(
                         Player("Gitje"),
                         ScoreSnapshot(0, Pair(12, 21))
@@ -224,7 +224,7 @@ fun getBadmintonScoresDummyData(): List<Game> {
                 Sports.Badminton
             ),
             Game(
-                LocalDateTime.now(), listOf(
+                LocalDateTime.now().minusDays(1), listOf(
                     ScoreEvent(
                         Player("Gitje"),
                         ScoreSnapshot(0, Pair(18, 21))
@@ -238,7 +238,7 @@ fun getBadmintonScoresDummyData(): List<Game> {
                 Sports.Badminton
             ),
             Game(
-                LocalDateTime.now(), listOf(
+                LocalDateTime.now().minusDays(8), listOf(
                     ScoreEvent(
                         Player("Gitje"),
                         ScoreSnapshot(0, Pair(5, 21))
@@ -252,7 +252,7 @@ fun getBadmintonScoresDummyData(): List<Game> {
                 Sports.Badminton
             ),
             Game(
-                LocalDateTime.now(), listOf(
+                LocalDateTime.now().minusDays(8), listOf(
                     ScoreEvent(
                         Player("Gitje"),
                         ScoreSnapshot(0, Pair(25, 23))
@@ -266,7 +266,7 @@ fun getBadmintonScoresDummyData(): List<Game> {
                 Sports.Badminton
             ),
             Game(
-                LocalDateTime.now(), listOf(
+                LocalDateTime.now().minusDays(8), listOf(
                     ScoreEvent(
                         Player("Gitje"),
                         ScoreSnapshot(0, Pair(21, 11))
