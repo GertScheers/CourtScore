@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -250,7 +251,7 @@ fun Overview(modifier: Modifier) {
                 }
 
                 itemsIndexed(gamesForDate, key = { _, game -> game.id }) { index, game ->
-                    if (LocalExpandedState.isExpanded(date)) {
+                    AnimatedVisibility(LocalExpandedState.isExpanded(date)) {
                         val cardShape = when (index) {
                             gamesForDate.size - 1 -> RoundedCornerShape(
                                 bottomStart = 10.dp,
