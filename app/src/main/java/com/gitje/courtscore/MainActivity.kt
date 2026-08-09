@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -247,7 +248,10 @@ fun Overview(modifier: Modifier) {
         LazyColumn {
             displayGames.entries.forEachIndexed { index, (date, gamesForDate) ->
                 item {
-                    CollapsibleHeader(date, index == 0)
+                    LaunchedEffect(datePickerState.selectedDateMillis) {
+                        LocalExpandedState.toggle(date, index == 0)
+                    }
+                    CollapsibleHeader(date)
                 }
 
                 itemsIndexed(gamesForDate, key = { _, game -> game.id }) { index, game ->
@@ -272,13 +276,8 @@ fun Overview(modifier: Modifier) {
 
 @Composable
 fun CollapsibleHeader(
-    date: LocalDate,
-    expandedByDefault: Boolean
+    date: LocalDate
 ) {
-    LaunchedEffect(Unit) {
-        LocalExpandedState.toggle(date, expandedByDefault)
-    }
-
     val expanded = LocalExpandedState.isExpanded(date)
 
     Card(
