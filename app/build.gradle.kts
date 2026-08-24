@@ -50,9 +50,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    //SDP & SSP
-    implementation(libs.intuit.sdp.android)
-    implementation(libs.intuit.ssp.android)
 
     implementation(libs.koin)
 
