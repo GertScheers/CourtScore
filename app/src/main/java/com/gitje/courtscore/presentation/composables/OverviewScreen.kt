@@ -1,5 +1,6 @@
 package com.gitje.courtscore.presentation.composables
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -30,6 +32,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedFilterChip
@@ -54,11 +58,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -81,9 +83,9 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Locale
 import kotlin.collections.component1
 import kotlin.collections.component2
+import androidx.compose.ui.platform.LocalLocale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,6 +101,7 @@ fun Overview(modifier: Modifier) {
     val showBadminton by viewModel.showBadminton.collectAsState()
     val showTennis by viewModel.showTennis.collectAsState()
     val showPadel by viewModel.showPadel.collectAsState()
+    var showFilter by remember { mutableStateOf(false) }
     var showCalendar by remember { mutableStateOf(false) }
     val filteredGames = remember(showBadminton, showTennis, showPadel) {
         val gameHistory = mutableMapOf<LocalDate, List<Game>>()
@@ -176,10 +179,17 @@ fun Overview(modifier: Modifier) {
         ) {
             Text(
                 text = "Game history",
-                fontSize = 28.sp,
+                style = MaterialTheme.typography.headlineLarge,
+                fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_filter),
+                    contentDescription = "Filter",
+                    modifier = Modifier.clickable(onClick = { showFilter = !showFilter })
+                )
+
                 Icon(
                     imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_calendar),
                     contentDescription = "Calendar",
@@ -188,56 +198,56 @@ fun Overview(modifier: Modifier) {
             }
         }
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ElevatedFilterChip(
-                selected = showBadminton,
-                onClick = { viewModel.setShowBadminton(!showBadminton) },
-                label = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_badminton),
-                            contentDescription = "Show badminton"
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text("Badminton")
+        AnimatedVisibility(showFilter) {
+            FlowRow(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ElevatedFilterChip(
+                    selected = showBadminton,
+                    onClick = { viewModel.setShowBadminton(!showBadminton) },
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_badminton),
+                                contentDescription = "Show badminton"
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Badminton")
+                        }
                     }
-                }
-            )
-            ElevatedFilterChip(
-                selected = showTennis,
-                onClick = { viewModel.setShowTennis(!showTennis) },
-                label = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_tennis),
-                            contentDescription = "Show Tennis"
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text("Tennis")
+                )
+                ElevatedFilterChip(
+                    selected = showTennis,
+                    onClick = { viewModel.setShowTennis(!showTennis) },
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_tennis),
+                                contentDescription = "Show Tennis"
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Tennis")
+                        }
                     }
-                }
-            )
-            ElevatedFilterChip(
-                selected = showPadel,
-                onClick = { viewModel.setShowPadel(!showPadel) },
-                label = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_padel),
-                            contentDescription = "Show Padel"
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text("Padel")
+                )
+                ElevatedFilterChip(
+                    selected = showPadel,
+                    onClick = { viewModel.setShowPadel(!showPadel) },
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(com.gitje.courtscore.R.drawable.ic_padel),
+                                contentDescription = "Show Padel"
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Padel")
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
         var isDragging by remember { mutableStateOf(false) }
@@ -251,7 +261,6 @@ fun Overview(modifier: Modifier) {
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 6.dp)
         ) {
             val scrollState = rememberScrollState(0)
             LazyColumn(state = gameListState) {
@@ -260,10 +269,13 @@ fun Overview(modifier: Modifier) {
                         gamesForDate.maxOf { it.scoreHistory.maxOf { e -> e.scoreAfter.set } }
 
                     stickyHeader {
-                        Box(
+                        Surface(
                             Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.background)
+                                .padding(bottom = 12.dp, start = 12.dp, end = 12.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(bottomStart = 20f, bottomEnd = 20f),
+                            shadowElevation = 8.dp
                         ) {
                             GameDateHeader(
                                 date = date,
@@ -287,27 +299,13 @@ fun Overview(modifier: Modifier) {
                     }
 
                     itemsIndexed(gamesForDate, key = { _, game -> game.id }) { index, game ->
-                        val cardShape = when (index) {
-                            0 -> RoundedCornerShape(
-                                topStart = 10.dp,
-                                topEnd = 10.dp
-                            )
-
-                            gamesForDate.size - 1 -> RoundedCornerShape(
-                                bottomStart = 10.dp,
-                                bottomEnd = 10.dp
-                            )
-
-                            else -> RectangleShape
-                        }
-                        ScoreCard(
+                        ScoreEntry(
                             game,
-                            cardShape,
                             scrollState,
                             maxSets = maxSet
                         )
                         if (index != gamesForDate.size - 1)
-                            HorizontalDivider()
+                            HorizontalDivider(Modifier.padding(horizontal = 12.dp))
                     }
                 }
             }
@@ -389,7 +387,8 @@ fun Overview(modifier: Modifier) {
                 ) {
                     Surface(
                         shape = CircleShape,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        shadowElevation = 6.dp
                     ) {
                         Column {
                             Icon(
@@ -462,7 +461,7 @@ fun GameDateHeader(
     wins: Int,
     losses: Int
 ) {
-    val dayFormatter = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
+    val dayFormatter = DateTimeFormatter.ofPattern("EEEE", LocalLocale.current.platformLocale)
 
     Row(
         modifier = Modifier
@@ -513,75 +512,71 @@ fun formatDateForHeader(date: LocalDate): String {
 }
 
 @Composable
-fun ScoreCard(
+fun ScoreEntry(
     game: Game,
-    cardShape: Shape,
     scrollState: ScrollState,
     maxSets: Int
 ) {
-    Card(shape = cardShape) {
-        Box {
+    Box(Modifier.padding(horizontal = 12.dp)) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(Modifier.weight(4f), verticalAlignment = Alignment.CenterVertically) {
+                Icon(game.getIcon(), contentDescription = game.sport.name)
+
+                Spacer(Modifier.width(16.dp))
+
+                Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.End) {
+                    Text("You", fontWeight = if (game.winner == PlayerId.P1) FontWeight.SemiBold else FontWeight.Thin)
+                    HorizontalDivider(Modifier.width(48.dp))
+                    Text("Opponent", fontWeight = if (game.winner == PlayerId.P2) FontWeight.SemiBold else FontWeight.Thin)
+                }
+            }
+
             Row(
                 Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(6f)
+                    .horizontalScroll(scrollState)
             ) {
-                Row(Modifier.weight(4f), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(game.getIcon(), contentDescription = game.sport.name)
-
-                    Spacer(Modifier.width(16.dp))
-
-                    Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.End) {
-                        Text("You", fontWeight = if (game.winner == PlayerId.P1) FontWeight.SemiBold else FontWeight.ExtraLight)
-                        HorizontalDivider(Modifier.width(48.dp))
-                        Text("Opponent", fontWeight = if (game.winner == PlayerId.P2) FontWeight.SemiBold else FontWeight.ExtraLight)
-                    }
-                }
-
-                Row(
-                    Modifier
-                        .weight(6f)
-                        .horizontalScroll(scrollState)
-                ) {
-                    game.scoreHistory.sortedBy { it.scoreAfter.set }
-                        .groupBy { it.scoreAfter.set }.toList().forEach { pair ->
-                            Column(
-                                Modifier
-                                    .padding(vertical = 4.dp)
-                                    .width(50.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                val myScore = pair.second.last().scoreAfter.points.first
-                                val opponentScore = pair.second.last().scoreAfter.points.second
-                                Text(
-                                    "$myScore",
-                                    fontWeight = if (myScore > opponentScore) FontWeight.Bold else FontWeight.ExtraLight
-                                )
-                                HorizontalDivider(Modifier.width(8.dp))
-                                Text(
-                                    "$opponentScore",
-                                    fontWeight = if (opponentScore > myScore) FontWeight.ExtraBold else FontWeight.ExtraLight
-                                )
-                            }
+                game.scoreHistory.sortedBy { it.scoreAfter.set }
+                    .groupBy { it.scoreAfter.set }.toList().forEach { pair ->
+                        Column(
+                            Modifier
+                                .padding(vertical = 4.dp)
+                                .width(50.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val myScore = pair.second.last().scoreAfter.points.first
+                            val opponentScore = pair.second.last().scoreAfter.points.second
+                            Text(
+                                "$myScore",
+                                fontWeight = if (myScore > opponentScore) FontWeight.Bold else FontWeight.Thin
+                            )
+                            HorizontalDivider(Modifier.width(8.dp))
+                            Text(
+                                "$opponentScore",
+                                fontWeight = if (opponentScore > myScore) FontWeight.ExtraBold else FontWeight.Thin
+                            )
                         }
+                    }
 
-                    val gameSets = game.scoreHistory.maxOf { it.scoreAfter.set }
-                    println("TEST GAMESETS = $gameSets MAX = $maxSets")
-                    if(maxSets > gameSets)
-                        Spacer(Modifier.width((50*(maxSets-gameSets)).dp))
-                }
+                val gameSets = game.scoreHistory.maxOf { it.scoreAfter.set }
+                if(maxSets > gameSets)
+                    Spacer(Modifier.width((50*(maxSets-gameSets)).dp))
             }
+        }
 
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .align(Alignment.CenterStart)
-                    .background(if (game.winner == PlayerId.P1) Color.Green else Color.Red)
-            ) {
-                Text("")
-            }
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .align(Alignment.CenterStart)
+                .background(if (game.winner == PlayerId.P1) Color.Green else Color.Red)
+        ) {
+            Text("")
         }
     }
 }

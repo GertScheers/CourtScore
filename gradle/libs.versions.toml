@@ -1,6 +1,6 @@
 [versions]
-agp = "8.13.1"
-kotlin = "2.2.0"
+agp = "9.3.2"
+kotlin = "2.2.10"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -17,6 +17,7 @@ coreSplashscreen = "1.0.1"
 composeNavigation = "1.5.6"
 composeNavigationVersion = "1.5.6"
 composeMaterial3 = "1.6.2"
+uiTextGoogleFonts = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscree
 androidx-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "composeNavigationVersion" }
 koin = { group = "io.insert-koin", name="koin-androidx-compose", version = "4.2.0"}
 compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
