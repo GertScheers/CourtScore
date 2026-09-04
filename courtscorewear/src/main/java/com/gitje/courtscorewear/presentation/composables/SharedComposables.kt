@@ -36,7 +36,7 @@ fun GameFinishedScreen(wonTeam: Int, backToStart: () -> Unit) {
 
 @Composable
 fun ServerPickerScreen(setServer: (Int) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Who will start?")
         Button(
             onClick = { setServer(1) },
