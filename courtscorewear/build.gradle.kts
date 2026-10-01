@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization") version "2.3.20"
 }
 
 android {
@@ -11,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.gitje.courtscorewear"
+        applicationId = "com.gitje.courtscore"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
@@ -29,11 +30,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     useLibrary("wear-sdk")
     buildFeatures {
@@ -55,6 +53,7 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.koin)
     implementation(libs.compose.material3)
+    implementation(libs.kotlin.json)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

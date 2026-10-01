@@ -17,6 +17,7 @@ coreSplashscreen = "1.0.1"
 composeNavigation = "1.5.6"
 composeNavigationVersion = "1.5.6"
 composeMaterial3 = "1.6.2"
+playServicesWearableVersion = "20.0.1"
 uiTextGoogleFonts = "1.12.0"
 
 [libraries]
@@ -42,6 +43,8 @@ androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscree
 androidx-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "composeNavigationVersion" }
 koin = { group = "io.insert-koin", name="koin-androidx-compose", version = "4.2.0"}
 compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+gms-play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearableVersion" }
+kotlin-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.11.0" }
 androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [plugins]

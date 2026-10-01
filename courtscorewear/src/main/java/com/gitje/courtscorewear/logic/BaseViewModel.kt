@@ -3,9 +3,13 @@ package com.gitje.courtscorewear.logic
 import android.app.Application
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
+import com.gitje.courtscorewear.models.Game
 import com.gitje.courtscorewear.models.GameType
+import com.gitje.courtscorewear.util.WearDataSyncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDateTime
 
 abstract class BaseViewModel(
     application: Application,
@@ -28,6 +32,7 @@ abstract class BaseViewModel(
     val servingTeam: StateFlow<Int> = _servingTeam
 
     protected var setsToPlay = 0
+    protected var ongoingGameType = GameType.Tennis
 
     fun setServingTeam(server: Int) {
         _servingTeam.value = server
@@ -43,7 +48,8 @@ abstract class BaseViewModel(
                 team2WonSets++
             }
         }
-        return if (team1WonSets > (setsToPlay / 2)) {
+
+        val wonTeam = if (team1WonSets > (setsToPlay / 2)) {
             // Team 1 Wins
             1
         } else if (team2WonSets > (setsToPlay / 2)) {
@@ -52,14 +58,31 @@ abstract class BaseViewModel(
         } else {
             0
         }
+        if (wonTeam > 0)
+            sendResultToWatch()
+
+        return wonTeam
     }
 
-    open fun startNewGame(sets: Int) {
+    open fun startNewGame(sets: Int, gameType: GameType) {
         ongoingScoring.clear()
         _wonTeam.value = 0
         _servingTeam.value = 0
         _team1SetResults.value = mutableListOf()
         _team2SetResults.value = mutableListOf()
         setsToPlay = sets
+        ongoingGameType = gameType
+    }
+
+    fun sendResultToWatch() {
+        val result = Game(
+            LocalDateTime.now(),
+            _team1SetResults.value,
+            _team2SetResults.value,
+            _wonTeam.value,
+            ongoingGameType
+        )
+        val test = WearDataSyncer(context = application)
+        test.syncDataToPhone(result)
     }
 }

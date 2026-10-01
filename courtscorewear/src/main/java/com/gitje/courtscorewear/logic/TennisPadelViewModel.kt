@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.gitje.courtscorewear.models.GameType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -18,11 +19,11 @@ class TennisPadelViewModel(
     private var lastPointScoring = emptyList<Int>()
     private var setServeStarer = 0
 
-    override fun startNewGame(sets: Int) {
+    override fun startNewGame(sets: Int, gameType: GameType) {
         _ongoingSetResults.value = listOf()
         lastPointScoring = emptyList()
         setServeStarer = 0
-        super.startNewGame(sets)
+        super.startNewGame(sets, gameType)
     }
 
     private fun checkIfPointIsWon(): Int? {
@@ -83,7 +84,7 @@ class TennisPadelViewModel(
         return null
     }
 
-    //TODO : Entire method needs testing
+    //TODO : I remember this has a bug
     override fun undoLastScore() {
         if (ongoingScoring.isNotEmpty())
             ongoingScoring.removeAt(ongoingScoring.size - 1)

@@ -31,9 +31,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedFilterChip
@@ -57,7 +54,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -73,7 +69,6 @@ import com.gitje.courtscore.getPadelScoresDummyData
 import com.gitje.courtscore.getTennisScoresDummyData
 import com.gitje.courtscore.logic.HistoryViewModel
 import com.gitje.courtscore.models.Game
-import com.gitje.courtscore.models.PlayerId
 import com.gitje.courtscore.ui.theme.CourtScoreTheme
 import com.gitje.courtscore.utils.mergeGames
 import kotlinx.coroutines.launch
@@ -266,7 +261,7 @@ fun Overview(modifier: Modifier) {
             LazyColumn(state = gameListState) {
                 displayGames.entries.forEach { (date, gamesForDate) ->
                     val maxSet =
-                        gamesForDate.maxOf { it.scoreHistory.maxOf { e -> e.scoreAfter.set } }
+                        gamesForDate.maxOf { it.player1History.size }
 
                     stickyHeader {
                         Surface(
@@ -279,8 +274,8 @@ fun Overview(modifier: Modifier) {
                         ) {
                             GameDateHeader(
                                 date = date,
-                                wins = gamesForDate.count { g -> g.winner == PlayerId.P1 },
-                                losses = gamesForDate.count { g -> g.winner == PlayerId.P2 }
+                                wins = gamesForDate.count { g -> g.winnerId == 1 },
+                                losses = gamesForDate.count { g -> g.winnerId == 2 }
                             )
                             Row(Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
                                 Spacer(Modifier.weight(4f))
@@ -526,14 +521,14 @@ fun ScoreEntry(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(Modifier.weight(4f), verticalAlignment = Alignment.CenterVertically) {
-                Icon(game.getIcon(), contentDescription = game.sport.name)
+                Icon(game.getIcon(), contentDescription = null)
 
                 Spacer(Modifier.width(16.dp))
 
                 Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.End) {
-                    Text("You", fontWeight = if (game.winner == PlayerId.P1) FontWeight.SemiBold else FontWeight.Thin)
+                    Text("You", fontWeight = if (game.winnerId == 1) FontWeight.SemiBold else FontWeight.Thin)
                     HorizontalDivider(Modifier.width(48.dp))
-                    Text("Opponent", fontWeight = if (game.winner == PlayerId.P2) FontWeight.SemiBold else FontWeight.Thin)
+                    Text("Opponent", fontWeight = if (game.winnerId == 2) FontWeight.SemiBold else FontWeight.Thin)
                 }
             }
 
@@ -542,29 +537,27 @@ fun ScoreEntry(
                     .weight(6f)
                     .horizontalScroll(scrollState)
             ) {
-                game.scoreHistory.sortedBy { it.scoreAfter.set }
-                    .groupBy { it.scoreAfter.set }.toList().forEach { pair ->
-                        Column(
-                            Modifier
-                                .padding(vertical = 4.dp)
-                                .width(50.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val myScore = pair.second.last().scoreAfter.points.first
-                            val opponentScore = pair.second.last().scoreAfter.points.second
-                            Text(
-                                "$myScore",
-                                fontWeight = if (myScore > opponentScore) FontWeight.Bold else FontWeight.Thin
-                            )
-                            HorizontalDivider(Modifier.width(8.dp))
-                            Text(
-                                "$opponentScore",
-                                fontWeight = if (opponentScore > myScore) FontWeight.ExtraBold else FontWeight.Thin
-                            )
-                        }
+                game.player1History.forEachIndexed { index, myScore ->
+                    val opponentScore = game.player2History[index]
+                    Column(
+                        Modifier
+                            .padding(vertical = 4.dp)
+                            .width(50.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "$myScore",
+                            fontWeight = if (myScore > opponentScore) FontWeight.Bold else FontWeight.Thin
+                        )
+                        HorizontalDivider(Modifier.width(8.dp))
+                        Text(
+                            "${game.player2History[index]}",
+                            fontWeight = if (opponentScore > myScore) FontWeight.ExtraBold else FontWeight.Thin
+                        )
                     }
+                }
 
-                val gameSets = game.scoreHistory.maxOf { it.scoreAfter.set }
+                val gameSets = game.player1History.size
                 if(maxSets > gameSets)
                     Spacer(Modifier.width((50*(maxSets-gameSets)).dp))
             }
@@ -574,7 +567,7 @@ fun ScoreEntry(
             modifier = Modifier
                 .width(4.dp)
                 .align(Alignment.CenterStart)
-                .background(if (game.winner == PlayerId.P1) Color.Green else Color.Red)
+                .background(if (game.winnerId == 1) Color.Green else Color.Red)
         ) {
             Text("")
         }

@@ -1,8 +1,3 @@
-/* While this template provides a good starting point for using Wear Compose, you can always
- * take a look at https://github.com/android/wear-os-samples/tree/main/ComposeStarter to find the
- * most up to date changes to the libraries and their usages.
- */
-
 package com.gitje.courtscorewear.presentation
 
 import android.os.Bundle
@@ -42,7 +37,6 @@ class WearActivity : ComponentActivity() {
         val sharedPref = getSharedPreferences("default", MODE_PRIVATE) ?: return
         val keepScreenOn = sharedPref.getBoolean(SETTING_KEEP_SCREEN_ON, false)
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
 
         if (keepScreenOn)
@@ -90,10 +84,10 @@ class WearActivity : ComponentActivity() {
                                 if (currentGameType == GameType.Tennis ||
                                     currentGameType == GameType.Padel
                                 ) {
-                                    tennisPadelViewModel.startNewGame(sets)
+                                    tennisPadelViewModel.startNewGame(sets, currentGameType)
                                     navController.navigate("tennisPadelGameScreen")
                                 } else {
-                                    badmintonViewModel.startNewGame(sets)
+                                    badmintonViewModel.startNewGame(sets, currentGameType)
                                     navController.navigate("badmintonGameScreen")
                                 }
                             }
