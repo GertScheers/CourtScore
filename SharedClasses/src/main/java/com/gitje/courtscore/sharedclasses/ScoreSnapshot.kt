@@ -15,6 +15,7 @@ import kotlinx.serialization.encoding.Encoder
 @Serializable(with = ScoreSnapshotSerializer::class)
 data class ScoreSnapshot(
     val set: Int,
+    // TODO: Double-check 0: Opponent 1: Self
     val points: Pair<Int, Int>
 )
 

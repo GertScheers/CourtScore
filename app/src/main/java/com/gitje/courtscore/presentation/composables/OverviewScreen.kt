@@ -89,11 +89,11 @@ import com.gitje.courtscore.utils.getIcon
 fun Overview(modifier: Modifier) {
     val viewModel: HistoryViewModel = koinViewModel()
     val tennisDummyScores =
-        remember { (getTennisScoresDummyData() + getTennisScoresDummyData() + getTennisScoresDummyData() + getTennisScoresDummyData()).groupBy { it.date.toLocalDate() } }
+        remember { getTennisScoresDummyData().groupBy { it.date.toLocalDate() } }
     val padelDummyScores =
-        remember { (getPadelScoresDummyData() + getPadelScoresDummyData() + getPadelScoresDummyData() + getPadelScoresDummyData()).groupBy { it.date.toLocalDate() } }
+        remember { getPadelScoresDummyData().groupBy { it.date.toLocalDate() } }
     val badmintonDummyScores =
-        remember { (getBadmintonScoresDummyData() + getBadmintonScoresDummyData() + getBadmintonScoresDummyData() + getBadmintonScoresDummyData()).groupBy { it.date.toLocalDate() } }
+        remember { getBadmintonScoresDummyData().groupBy { it.date.toLocalDate() } }
     val showBadminton by viewModel.showBadminton.collectAsState()
     val showTennis by viewModel.showTennis.collectAsState()
     val showPadel by viewModel.showPadel.collectAsState()
@@ -261,8 +261,7 @@ fun Overview(modifier: Modifier) {
             val scrollState = rememberScrollState(0)
             LazyColumn(state = gameListState) {
                 displayGames.entries.forEach { (date, gamesForDate) ->
-                    val maxSet =
-                        gamesForDate.maxOf { it.player1History.size }
+                    val maxSet = gamesForDate.maxOf { it.scoreHistory.maxOf { sh -> sh.scoreAfter.set } }
 
                     stickyHeader {
                         Surface(
@@ -527,9 +526,9 @@ fun ScoreEntry(
                 Spacer(Modifier.width(16.dp))
 
                 Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.End) {
-                    Text("You", fontWeight = if (game.winnerId == 1) FontWeight.SemiBold else FontWeight.Thin)
+                    Text("You", fontWeight = if (game.winnerId == 1) FontWeight.ExtraBold else FontWeight.Thin)
                     HorizontalDivider(Modifier.width(48.dp))
-                    Text("Opponent", fontWeight = if (game.winnerId == 2) FontWeight.SemiBold else FontWeight.Thin)
+                    Text("Opponent", fontWeight = if (game.winnerId == 2) FontWeight.ExtraBold else FontWeight.Thin)
                 }
             }
 
@@ -538,8 +537,9 @@ fun ScoreEntry(
                     .weight(6f)
                     .horizontalScroll(scrollState)
             ) {
-                game.player1History.forEachIndexed { index, myScore ->
-                    val opponentScore = game.player2History[index]
+                game.scoreHistory.groupBy { it.scoreAfter.set }.forEach {
+                    val myScore = it.value.last().scoreAfter.points.second
+                    val opponentScore = it.value.last().scoreAfter.points.first
                     Column(
                         Modifier
                             .padding(vertical = 4.dp)
@@ -548,17 +548,17 @@ fun ScoreEntry(
                     ) {
                         Text(
                             "$myScore",
-                            fontWeight = if (myScore > opponentScore) FontWeight.Bold else FontWeight.Thin
+                            fontWeight = if (myScore > opponentScore) FontWeight.ExtraBold else FontWeight.Thin
                         )
                         HorizontalDivider(Modifier.width(8.dp))
                         Text(
-                            "${game.player2History[index]}",
+                            "$opponentScore",
                             fontWeight = if (opponentScore > myScore) FontWeight.ExtraBold else FontWeight.Thin
                         )
                     }
                 }
 
-                val gameSets = game.player1History.size
+                val gameSets = game.scoreHistory.maxOf { it.scoreAfter.set }
                 if(maxSets > gameSets)
                     Spacer(Modifier.width((50*(maxSets-gameSets)).dp))
             }

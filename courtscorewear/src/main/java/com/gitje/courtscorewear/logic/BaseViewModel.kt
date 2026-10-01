@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import com.gitje.courtscore.sharedclasses.Game
 import com.gitje.courtscore.sharedclasses.GameType
+import com.gitje.courtscore.sharedclasses.ScoreEvent
 import com.gitje.courtscorewear.util.WearDataSyncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,9 +18,6 @@ abstract class BaseViewModel(
     abstract fun teamScored(player: Int)
     abstract fun checkIfSetIsWon(): Int?
     abstract fun undoLastScore()
-
-    // Track ongoing points
-    val ongoingScoring: SnapshotStateList<Int> = SnapshotStateList()
 
     // Stores past finished set's results
     protected var _team1SetResults = MutableStateFlow(mutableListOf<Int>())
@@ -33,6 +31,11 @@ abstract class BaseViewModel(
 
     protected var setsToPlay = 0
     protected var ongoingGameType = GameType.Tennis
+
+    //region New scoring logic for full history
+    val scoreHistory: SnapshotStateList<ScoreEvent> = SnapshotStateList()
+    var ongoingSet = 0
+    //endregion
 
     fun setServingTeam(server: Int) {
         _servingTeam.value = server
@@ -65,20 +68,20 @@ abstract class BaseViewModel(
     }
 
     open fun startNewGame(sets: Int, gameType: GameType) {
-        ongoingScoring.clear()
+        scoreHistory.clear()
         _wonTeam.value = 0
         _servingTeam.value = 0
         _team1SetResults.value = mutableListOf()
         _team2SetResults.value = mutableListOf()
         setsToPlay = sets
         ongoingGameType = gameType
+        ongoingSet = 0
     }
 
     fun sendResultToWatch() {
         val result = Game(
             LocalDateTime.now(),
-            _team1SetResults.value,
-            _team2SetResults.value,
+            scoreHistory,
             _wonTeam.value,
             ongoingGameType
         )

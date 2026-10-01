@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.SharedPreferences
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.gitje.courtscore.sharedclasses.ScoreEvent
+import com.gitje.courtscore.sharedclasses.ScoreSnapshot
 import kotlin.collections.isNotEmpty
 
 class BadmintonViewModel(
@@ -11,7 +13,24 @@ class BadmintonViewModel(
     val sharedPreferences: SharedPreferences
 ) : BaseViewModel(application) {
     override fun teamScored(player: Int) {
-        ongoingScoring.add(player)
+        var opponentScore = 0
+        var ownScore = 0
+        // Keep at 0 if a new set has started, otherwise check last snapshot
+        if (scoreHistory.last().scoreAfter.set == ongoingSet) {
+            opponentScore = scoreHistory.last().scoreAfter.points.first
+            ownScore = scoreHistory.last().scoreAfter.points.second
+        }
+
+        if(player == 0) {
+            opponentScore++
+        } else ownScore++
+
+        scoreHistory.add(
+            ScoreEvent(
+                player,
+                ScoreSnapshot(ongoingSet, Pair(opponentScore, ownScore))
+            )
+        )
 
         val setOver = checkIfSetIsWon()
         //setOver == null -> Continue game
@@ -21,18 +40,17 @@ class BadmintonViewModel(
             } else {
                 _servingTeam.value = 2
             }
-            _team1SetResults.value.add(ongoingScoring.count { score -> score == 1 })
-            _team2SetResults.value.add(ongoingScoring.count { score -> score == 2 })
-            ongoingScoring.clear()
+            _team1SetResults.value.add(scoreHistory.filter { it.scoreAfter.set == ongoingSet }.maxOf { score -> score.scoreAfter.points.first })
+            _team1SetResults.value.add(scoreHistory.filter { it.scoreAfter.set == ongoingSet }.maxOf { score -> score.scoreAfter.points.second })
             _wonTeam.value = checkIfGameIsWon()
         } ?: run {
-            _servingTeam.value = ongoingScoring.last()
+            _servingTeam.value = scoreHistory.last().scoringPlayer
         }
     }
 
     override fun checkIfSetIsWon(): Int? {
-        val team1Score = ongoingScoring.count { it == 1 }
-        val team2Score = ongoingScoring.count { it == 2 }
+        val team1Score = scoreHistory.last().scoreAfter.points.first
+        val team2Score = scoreHistory.last().scoreAfter.points.second
 
         if (team1Score > 20 && team1Score - team2Score > 1)
             return 1
@@ -43,28 +61,7 @@ class BadmintonViewModel(
     }
 
     override fun undoLastScore() {
-        if (ongoingScoring.isNotEmpty())
-            ongoingScoring.removeAt(ongoingScoring.size - 1)
-        else if (_team1SetResults.value.isNotEmpty()) {
-            //Undo won set, fill history with setHistory's values and continue playing 'closed set'
-            var pointsForTeam1 = _team1SetResults.value.last()
-            var pointsForTeam2 = _team2SetResults.value.last()
-
-            //If someone won the set with '21', set them back to 20
-            if (pointsForTeam1 > pointsForTeam2)
-                pointsForTeam1--
-            else
-                pointsForTeam2--
-
-            repeat(pointsForTeam1) {
-                ongoingScoring.add(1)
-            }
-            repeat(pointsForTeam2) {
-                ongoingScoring.add(2)
-            }
-            _team1SetResults.value.removeAt(_team1SetResults.value.lastIndex)
-            _team2SetResults.value.removeAt(_team2SetResults.value.lastIndex)
-        }
+        scoreHistory.removeAt(scoreHistory.lastIndex)
     }
 
     fun getTeam1Color(): String {
