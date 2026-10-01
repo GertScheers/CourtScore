@@ -14,12 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
@@ -27,8 +25,8 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
-import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
+import com.gitje.courtscore.sharedclasses.GameType
 
 @Composable
 fun SportsChoiceScreen(navigateToSettings: () -> Unit,navigateToGameScreen: (GameType) -> Unit) {

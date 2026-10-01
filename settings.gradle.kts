@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "CourtScore"
 include(":app")
 include(":courtscorewear")
+include(":SharedClasses")

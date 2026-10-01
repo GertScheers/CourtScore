@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
-import com.gitje.courtscorewear.models.Game
-import com.gitje.courtscorewear.models.GameType
+import com.gitje.courtscore.sharedclasses.Game
+import com.gitje.courtscore.sharedclasses.GameType
 import com.gitje.courtscorewear.util.WearDataSyncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

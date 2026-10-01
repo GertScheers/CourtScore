@@ -1,6 +1,6 @@
 package com.gitje.courtscore.util
 
-import com.gitje.courtscore.models.Game
+import com.gitje.courtscore.sharedclasses.Game
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem

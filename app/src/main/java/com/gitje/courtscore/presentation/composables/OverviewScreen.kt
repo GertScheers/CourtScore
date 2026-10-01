@@ -68,7 +68,6 @@ import com.gitje.courtscore.getBadmintonScoresDummyData
 import com.gitje.courtscore.getPadelScoresDummyData
 import com.gitje.courtscore.getTennisScoresDummyData
 import com.gitje.courtscore.logic.HistoryViewModel
-import com.gitje.courtscore.models.Game
 import com.gitje.courtscore.ui.theme.CourtScoreTheme
 import com.gitje.courtscore.utils.mergeGames
 import kotlinx.coroutines.launch
@@ -81,6 +80,8 @@ import java.time.temporal.ChronoUnit
 import kotlin.collections.component1
 import kotlin.collections.component2
 import androidx.compose.ui.platform.LocalLocale
+import com.gitje.courtscore.sharedclasses.Game
+import com.gitje.courtscore.utils.getIcon
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -2,14 +2,14 @@ package com.gitje.courtscorewear.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.gitje.courtscorewear.logic.BaseViewModel
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import kotlinx.serialization.json.Json
+import com.gitje.courtscore.sharedclasses.Game
 
 class WearDataSyncer(private val context: Context) {
     @SuppressLint("VisibleForTests")
-    fun syncDataToPhone(game: BaseViewModel.Game): Boolean {
+    fun syncDataToPhone(game: Game): Boolean {
         return try {
             // 1. Create a PutDataMapRequest with a unique path
             val dataMapRequest = PutDataMapRequest.create("/game_result").apply {

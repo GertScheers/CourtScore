@@ -20,10 +20,10 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.gitje.courtscore.sharedclasses.GameType
 import com.gitje.courtscorewear.logic.BadmintonViewModel
 import com.gitje.courtscorewear.logic.SETTING_KEEP_SCREEN_ON
 import com.gitje.courtscorewear.logic.TennisPadelViewModel
-import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.composables.BadmintonGameScreen
 import com.gitje.courtscorewear.presentation.composables.SetsChoiceScreen
 import com.gitje.courtscorewear.presentation.composables.SettingsScreen

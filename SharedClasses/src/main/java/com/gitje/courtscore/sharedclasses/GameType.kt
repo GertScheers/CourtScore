@@ -1,4 +1,4 @@
-package com.gitje.courtscorewear.models
+package com.gitje.courtscore.sharedclasses
 
 enum class GameType {
     Tennis,

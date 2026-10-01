@@ -37,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.wear.compose.material.CompactButton
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
@@ -45,10 +44,10 @@ import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.gitje.courtscorewear.R
 import com.gitje.courtscorewear.logic.TennisPadelViewModel
-import com.gitje.courtscorewear.models.GameType
 import com.gitje.courtscorewear.presentation.theme.CourtScoreTheme
 import com.gitje.courtscorewear.util.getTennisScore
 import org.koin.androidx.compose.koinViewModel
+import com.gitje.courtscore.sharedclasses.GameType
 
 @Composable
 fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {

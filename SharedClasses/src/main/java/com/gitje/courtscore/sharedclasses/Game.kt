@@ -1,14 +1,10 @@
-package com.gitje.courtscore.models
+package com.gitje.courtscore.sharedclasses
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import com.gitje.courtscore.R
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDateTime
@@ -19,25 +15,11 @@ import java.util.UUID
 data class Game(
     @Serializable(with = LocalDateTimeSerializer::class)
     val date: LocalDateTime,
-    //val scoreHistory: List<ScoreEvent>,//TODO: re-implement later to have full details of set-history point-by-point
-    val player1History: List<Int>,
-    val player2History: List<Int>,
+    val scoreHistory: List<ScoreEvent>,
     val winnerId: Int,
     val sport: GameType
 ) {
-    @Contextual
-    val id: UUID = UUID.randomUUID()
-
-    @Composable
-    fun getIcon(): ImageVector {
-        return ImageVector.vectorResource(
-            when (sport) {
-                GameType.Tennis -> R.drawable.ic_tennis
-                GameType.Padel -> R.drawable.ic_padel
-                else -> R.drawable.ic_badminton
-            }
-        )
-    }
+    val id = UUID.randomUUID().toString()
 }
 
 @OptIn(ExperimentalSerializationApi::class)
