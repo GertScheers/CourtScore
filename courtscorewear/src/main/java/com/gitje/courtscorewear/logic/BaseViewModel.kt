@@ -6,7 +6,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import com.gitje.courtscore.sharedclasses.Game
 import com.gitje.courtscore.sharedclasses.GameType
+import com.gitje.courtscore.sharedclasses.PointScore
 import com.gitje.courtscore.sharedclasses.ScoreEvent
+import com.gitje.courtscore.sharedclasses.ScoreSnapshot
 import com.gitje.courtscorewear.util.WearDataSyncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,10 +22,10 @@ abstract class BaseViewModel(
     abstract fun undoLastScore()
 
     // Stores past finished set's results
-    protected var _team1SetResults = MutableStateFlow(mutableListOf<Int>())
-    val team1SetResults: StateFlow<List<Int>> = _team1SetResults
-    protected var _team2SetResults = MutableStateFlow(mutableListOf<Int>())
-    val team2SetResults: StateFlow<List<Int>> = _team2SetResults
+    protected var _opponentSetResults = MutableStateFlow(mutableListOf<Int>())
+    val opponentSetResults: StateFlow<List<Int>> = _opponentSetResults
+    protected var _mySetResults = MutableStateFlow(mutableListOf<Int>())
+    val mySetResults: StateFlow<List<Int>> = _mySetResults
     protected var _wonTeam = MutableStateFlow(0)
     val wonTeam: StateFlow<Int> = _wonTeam
     protected var _servingTeam = MutableStateFlow(0)
@@ -42,21 +44,21 @@ abstract class BaseViewModel(
     }
 
     fun checkIfGameIsWon(): Int {
-        var team1WonSets = 0
-        var team2WonSets = 0
-        _team1SetResults.value.forEachIndexed { index, score ->
-            if (score > _team2SetResults.value[index]) {
-                team1WonSets++
+        var opponentWonSets = 0
+        var myWonSets = 0
+        _opponentSetResults.value.forEachIndexed { index, score ->
+            if (score > _mySetResults.value[index]) {
+                opponentWonSets++
             } else {
-                team2WonSets++
+                myWonSets++
             }
         }
 
-        val wonTeam = if (team1WonSets > (setsToPlay / 2)) {
-            // Team 1 Wins
+        val wonTeam = if (opponentWonSets > (setsToPlay / 2)) {
+            // Opponent Wins
             1
-        } else if (team2WonSets > (setsToPlay / 2)) {
-            // Team2 Wins
+        } else if (myWonSets > (setsToPlay / 2)) {
+            // I/We Win(s)
             2
         } else {
             0
@@ -69,10 +71,16 @@ abstract class BaseViewModel(
 
     open fun startNewGame(sets: Int, gameType: GameType) {
         scoreHistory.clear()
+        scoreHistory.add(
+            ScoreEvent(
+                _servingTeam.value,
+                ScoreSnapshot(0, PointScore(0, 0))
+            )
+        )
         _wonTeam.value = 0
         _servingTeam.value = 0
-        _team1SetResults.value = mutableListOf()
-        _team2SetResults.value = mutableListOf()
+        _opponentSetResults.value = mutableListOf()
+        _mySetResults.value = mutableListOf()
         setsToPlay = sets
         ongoingGameType = gameType
         ongoingSet = 0

@@ -2,6 +2,7 @@ package com.gitje.courtscore
 
 import com.gitje.courtscore.sharedclasses.Game
 import com.gitje.courtscore.sharedclasses.GameType
+import com.gitje.courtscore.sharedclasses.PointScore
 import com.gitje.courtscore.sharedclasses.ScoreEvent
 import com.gitje.courtscore.sharedclasses.ScoreSnapshot
 import java.time.LocalDateTime
@@ -13,7 +14,7 @@ fun getTennisScoresDummyData(): List<Game> {
             listOf(
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(0, Pair(5, 0))
+                    ScoreSnapshot(0, PointScore(5, 0))
                 ),
             ),
             1,
@@ -30,7 +31,7 @@ fun getPadelScoresDummyData(): List<Game> {
             listOf(
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(0, Pair(5, 0))
+                    ScoreSnapshot(0, PointScore(5, 0))
                 ),
             ),
             2,
@@ -46,11 +47,11 @@ fun getBadmintonScoresDummyData(): List<Game> {
             listOf(
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(0, Pair(21, 12))
+                    ScoreSnapshot(0, PointScore(21, 12))
                 ),
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(1, Pair(21, 16))
+                    ScoreSnapshot(1, PointScore(21, 16))
                 ),
             ),
             0,
@@ -61,11 +62,11 @@ fun getBadmintonScoresDummyData(): List<Game> {
             listOf(
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(0, Pair(12, 21))
+                    ScoreSnapshot(0, PointScore(12, 21))
                 ),
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(1, Pair(16, 21))
+                    ScoreSnapshot(1, PointScore(16, 21))
                 ),
             ),
             1,
@@ -76,15 +77,15 @@ fun getBadmintonScoresDummyData(): List<Game> {
             listOf(
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(0, Pair(21, 12))
+                    ScoreSnapshot(0, PointScore(21, 12))
                 ),
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(1, Pair(10, 21))
+                    ScoreSnapshot(1, PointScore(10, 21))
                 ),
                 ScoreEvent(
                     0,
-                    ScoreSnapshot(2, Pair(21, 16))
+                    ScoreSnapshot(2, PointScore(21, 16))
                 ),
             ),
             1,

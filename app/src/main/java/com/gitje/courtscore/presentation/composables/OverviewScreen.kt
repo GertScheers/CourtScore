@@ -538,8 +538,8 @@ fun ScoreEntry(
                     .horizontalScroll(scrollState)
             ) {
                 game.scoreHistory.groupBy { it.scoreAfter.set }.forEach {
-                    val myScore = it.value.last().scoreAfter.points.second
-                    val opponentScore = it.value.last().scoreAfter.points.first
+                    val myScore = it.value.last().scoreAfter.points.myScore
+                    val opponentScore = it.value.last().scoreAfter.points.opponentScore
                     Column(
                         Modifier
                             .padding(vertical = 4.dp)

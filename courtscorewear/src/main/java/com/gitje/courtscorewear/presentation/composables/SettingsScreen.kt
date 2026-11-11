@@ -46,8 +46,8 @@ fun SettingsScreen(
     val viewModel: SettingsViewModel = koinViewModel()
 
     val keepScreenOn by remember { mutableStateOf(viewModel.getKeepScreenOn()) }
-    var team1Color by remember { mutableStateOf(viewModel.getTeam1Color()) }
-    var team2Color by remember { mutableStateOf(viewModel.getTeam2Color()) }
+    var opponentColor by remember { mutableStateOf(viewModel.getOpponentColor()) }
+    var myColor by remember { mutableStateOf(viewModel.getMyColor()) }
 
     BackHandler(enabled = showColorSelector.first) {
         showColorSelector = Pair(false, 0)
@@ -83,7 +83,7 @@ fun SettingsScreen(
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(Color(("#$team1Color").toColorInt()))
+                            .background(Color(("#$opponentColor").toColorInt()))
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -101,7 +101,7 @@ fun SettingsScreen(
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(Color(("#$team2Color").toColorInt()))
+                            .background(Color(("#$myColor").toColorInt()))
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -112,12 +112,12 @@ fun SettingsScreen(
     if (showColorSelector.first) {
         ColorSelector {
             if (showColorSelector.second == 1) {
-                viewModel.setTeam1Color(it)
-                team1Color = it
+                viewModel.setOpponentColor(it)
+                opponentColor = it
                 showColorSelector = Pair(false, 0)
             } else if (showColorSelector.second == 2) {
-                viewModel.setTeam2Color(it)
-                team2Color = it
+                viewModel.setMyColor(it)
+                myColor = it
                 showColorSelector = Pair(false, 0)
             }
         }

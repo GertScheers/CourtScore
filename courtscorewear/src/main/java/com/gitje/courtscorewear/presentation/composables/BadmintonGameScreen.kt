@@ -51,38 +51,14 @@ import org.koin.androidx.compose.koinViewModel
 fun BadmintonGameScreen(backToStart: () -> Unit) {
     val badmintonViewModel: BadmintonViewModel = koinViewModel()
 
-    val ongoingScoring = remember { badmintonViewModel.ongoingScoring }
+    val ongoingScoring = remember { badmintonViewModel.scoreHistory }
     val wonTeam by badmintonViewModel.wonTeam.collectAsState()
     val servingTeam by badmintonViewModel.servingTeam.collectAsState()
-    val team1SetHistory by badmintonViewModel.team1SetResults.collectAsState()
-    val team2SetHistory by badmintonViewModel.team2SetResults.collectAsState()
+    val opponentSetResults by badmintonViewModel.opponentSetResults.collectAsState()
+    val mySetResults by badmintonViewModel.mySetResults.collectAsState()
 
-    val team1Score = ongoingScoring.count { it == 1 }
-    val team2Score = ongoingScoring.count { it == 2 }
-
-    // Scoring animation fields & triggers
-    var prevTeam1 by remember { mutableIntStateOf(team1Score) }
-    var prevTeam2 by remember { mutableIntStateOf(team2Score) }
-    var animationTriggerTeam1 by remember { mutableIntStateOf(0) }
-    var animationTriggerTeam2 by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(ongoingScoring.size) {
-        val newT1 = ongoingScoring.count { it == 1 }
-        val newT2 = ongoingScoring.count { it == 2 }
-
-        when {
-            newT1 > prevTeam1 -> {
-                animationTriggerTeam1 += 1
-            }
-
-            newT2 > prevTeam2 -> {
-                animationTriggerTeam2 += 1
-            }
-        }
-
-        prevTeam1 = newT1
-        prevTeam2 = newT2
-    }
+    var opponentAnimationTrigger by remember { mutableIntStateOf(0) }
+    var myAnimationTrigger by remember { mutableIntStateOf(0) }
 
     TimeText()
     if (wonTeam == 0) {
@@ -91,7 +67,32 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
                 badmintonViewModel.setServingTeam(it)
             }
         } else {
+            val opponentScore = ongoingScoring.last().scoreAfter.points.opponentScore
+            val myScore = ongoingScoring.last().scoreAfter.points.myScore
+
+            // Scoring animation fields & triggers
+            var prevOppScore by remember { mutableIntStateOf(opponentScore) }
+            var prevMyScore by remember { mutableIntStateOf(myScore) }
+
             var watchWidth by remember { mutableStateOf(0.dp) }
+
+            LaunchedEffect(ongoingScoring.size) {
+                val newOppScore = ongoingScoring.last().scoreAfter.points.opponentScore
+                val newMyScore = ongoingScoring.last().scoreAfter.points.myScore
+
+                when {
+                    newOppScore > prevOppScore -> {
+                        opponentAnimationTrigger += 1
+                    }
+
+                    newMyScore > prevMyScore -> {
+                        myAnimationTrigger += 1
+                    }
+                }
+
+                prevOppScore = newOppScore
+                prevMyScore = newMyScore
+            }
 
             Box(modifier = Modifier.fillMaxHeight(0.8f).onGloballyPositioned {
                 watchWidth = it.size.width.dp
@@ -99,15 +100,15 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
                 Box {
                     BadmintonScoringUI(
                         servingTeam,
-                        team1Score,
-                        team2Score,
-                        badmintonViewModel.getTeam1Color(),
-                        badmintonViewModel.getTeam2Color(),
-                        team1SetHistory,
-                        team2SetHistory,
+                        opponentScore,
+                        myScore,
+                        badmintonViewModel.getOpponentColor(),
+                        badmintonViewModel.getMyColor(),
+                        opponentSetResults,
+                        mySetResults,
                         teamScored = { badmintonViewModel.teamScored(it) },
-                        popTriggerTeam1 = animationTriggerTeam1,
-                        popTriggerTeam2 = animationTriggerTeam2,
+                        opponentTriggerAnim = opponentAnimationTrigger,
+                        myTriggerAnim = myAnimationTrigger,
                     )
                 }
 
@@ -143,15 +144,15 @@ fun BadmintonGameScreen(backToStart: () -> Unit) {
 @Composable
 fun BadmintonScoringUI(
     servingTeam: Int,
-    team1Score: Int,
-    team2Score: Int,
-    team1Color: String,
-    team2Color: String,
-    team1SetHistory: List<Int>,
-    team2SetHistory: List<Int>,
+    opponentScore: Int,
+    myScore: Int,
+    opponentColor: String,
+    myColor: String,
+    opponentSetHistory: List<Int>,
+    mySetHistory: List<Int>,
     teamScored: (Int) -> Unit,
-    popTriggerTeam1: Int = 0,
-    popTriggerTeam2: Int = 0,
+    opponentTriggerAnim: Int = 0,
+    myTriggerAnim: Int = 0,
 ) {
     // Used as a center-base for the scoring animations
     var rootCenter by remember { mutableStateOf(Offset.Zero) }
@@ -172,7 +173,7 @@ fun BadmintonScoringUI(
                 modifier =
                     Modifier
                         .weight(0.7f)
-                        .background(Color(("#$team1Color").toColorInt()).copy(0.5f))
+                        .background(Color(("#$opponentColor").toColorInt()).copy(0.5f))
                         .fillMaxWidth()
                         .clickable(onClick = {
                             teamScored(1)
@@ -188,7 +189,7 @@ fun BadmintonScoringUI(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End,
                         ) {
-                            if (team1Score % 2 == 0) {
+                            if (opponentScore % 2 == 0) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_badminton),
                                     null,
@@ -197,8 +198,8 @@ fun BadmintonScoringUI(
                                             .size(20.dp),
                                 )
                                 AnimatedScoreText(
-                                    score = "$team1Score",
-                                    popTrigger = popTriggerTeam1,
+                                    score = "$opponentScore",
+                                    popTrigger = opponentTriggerAnim,
                                     rootCenter = rootCenter,
                                 )
                             }
@@ -208,10 +209,10 @@ fun BadmintonScoringUI(
                             Modifier.weight(0.4f),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            if (team1Score % 2 != 0) {
+                            if (opponentScore % 2 != 0) {
                                 AnimatedScoreText(
-                                    score = "$team1Score",
-                                    popTrigger = popTriggerTeam1,
+                                    score = "$opponentScore",
+                                    popTrigger = opponentTriggerAnim,
                                     rootCenter = rootCenter,
                                     modifier = Modifier.padding(start = 3.dp),
                                 )
@@ -226,7 +227,7 @@ fun BadmintonScoringUI(
                         }
                     } else {
                         Text(
-                            text = if (team2Score % 2 == 0) "$team1Score" else "",
+                            text = if (myScore % 2 == 0) "$opponentScore" else "",
                             modifier = Modifier.weight(0.4f),
                             textAlign = TextAlign.End,
                         )
@@ -234,7 +235,7 @@ fun BadmintonScoringUI(
                         Text(" | ", Modifier.weight(0.1f))
 
                         Text(
-                            text = if (team2Score % 2 != 0) "$team1Score" else "",
+                            text = if (myScore % 2 != 0) "$opponentScore" else "",
                             modifier =
                                 Modifier
                                     .weight(0.4f)
@@ -249,7 +250,7 @@ fun BadmintonScoringUI(
                     Modifier
                         .weight(0.7f)
                         .fillMaxWidth()
-                        .background(Color(("#$team2Color").toColorInt()).copy(0.5f))
+                        .background(Color(("#$myColor").toColorInt()).copy(0.5f))
                         .clickable(onClick = {
                             teamScored(2)
                         }),
@@ -264,7 +265,7 @@ fun BadmintonScoringUI(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End,
                         ) {
-                            if (team2Score % 2 != 0) {
+                            if (myScore % 2 != 0) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_badminton),
                                     null,
@@ -273,8 +274,8 @@ fun BadmintonScoringUI(
                                             .size(20.dp),
                                 )
                                 AnimatedScoreText(
-                                    score = "$team2Score",
-                                    popTrigger = popTriggerTeam2,
+                                    score = "$myScore",
+                                    popTrigger = myTriggerAnim,
                                     rootCenter = rootCenter,
                                 )
                             }
@@ -284,10 +285,10 @@ fun BadmintonScoringUI(
                             Modifier.weight(0.4f),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            if (team2Score % 2 == 0) {
+                            if (myScore % 2 == 0) {
                                 AnimatedScoreText(
-                                    score = "$team2Score",
-                                    popTrigger = popTriggerTeam2,
+                                    score = "$myScore",
+                                    popTrigger = myTriggerAnim,
                                     rootCenter = rootCenter,
                                     modifier = Modifier.padding(start = 3.dp),
                                 )
@@ -302,7 +303,7 @@ fun BadmintonScoringUI(
                         }
                     } else {
                         Text(
-                            text = if (team1Score % 2 != 0) "$team2Score" else "",
+                            text = if (opponentScore % 2 != 0) "$myScore" else "",
                             modifier = Modifier.weight(0.4f),
                             textAlign = TextAlign.End,
                         )
@@ -310,7 +311,7 @@ fun BadmintonScoringUI(
                         Text(" | ", Modifier.weight(0.1f))
 
                         Text(
-                            text = if (team1Score % 2 == 0) "$team2Score" else "",
+                            text = if (opponentScore % 2 == 0) "$myScore" else "",
                             modifier =
                                 Modifier
                                     .weight(0.4f)
@@ -322,12 +323,12 @@ fun BadmintonScoringUI(
         }
 
         Row(Modifier.align(Alignment.Center)) {
-            team1SetHistory.forEachIndexed { index, score ->
+            opponentSetHistory.forEachIndexed { index, score ->
                 Column(
                     Modifier.padding(horizontal = 3.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    val score2 = team2SetHistory[index]
+                    val score2 = mySetHistory[index]
                     Text(
                         text = "$score",
                         textDecoration = if (score > score2) TextDecoration.Underline else null,
@@ -362,7 +363,7 @@ fun BadmintonScoringUIPreview() {
                 Color.Red.toArgb().toHexString(),
                 Color.Blue.toArgb().toHexString(),
                 listOf(21, 21),
-                team2SetHistory = listOf(16, 18),
+                mySetHistory = listOf(16, 18),
                 teamScored = { },
             )
         }

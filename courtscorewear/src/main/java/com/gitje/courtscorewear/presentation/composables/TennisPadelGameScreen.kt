@@ -55,25 +55,24 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
 
     val wonTeam by viewModel.wonTeam.collectAsState()
     val servingTeam by viewModel.servingTeam.collectAsState()
-    val ongoingScore = remember { viewModel.ongoingScoring }
-    val ongoingSetResults by viewModel.ongoingSetResults.collectAsState()
-    val team1SetHistory by viewModel.team1SetResults.collectAsState()
-    val team2SetHistory by viewModel.team2SetResults.collectAsState()
+    val ongoingScore = remember { viewModel.scoreHistory }
+    val opponentSetResults by viewModel.opponentSetResults.collectAsState()
+    val mySetResults by viewModel.mySetResults.collectAsState()
 
-    var team1Score by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.count { it == 1 }) }
-    var team2Score by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.count { it == 2 }) }
+    var opponentScore by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.last().scoreAfter.gamePoints.first) }
+    var myScore by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.last().scoreAfter.gamePoints.second) }
 
-    var team1SetScore by remember(ongoingSetResults) { mutableIntStateOf(ongoingSetResults.count { it == 1 }) }
-    var team2SetScore by remember(ongoingSetResults) { mutableIntStateOf(ongoingSetResults.count { it == 2 }) }
+    var opponentSetScore by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.last().scoreAfter.points.opponentScore) }
+    var mySetScore by remember(ongoingScore.size) { mutableIntStateOf(ongoingScore.last().scoreAfter.points.myScore) }
 
-    var animationTriggerTeam1 by remember { mutableIntStateOf(0) }
-    var animationTriggerTeam2 by remember { mutableIntStateOf(0) }
+    var opponentAnimationTrigger by remember { mutableIntStateOf(0) }
+    var myAnimationTrigger by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(team1Score) {
-        animationTriggerTeam1++
+    LaunchedEffect(opponentScore) {
+        opponentAnimationTrigger++
     }
-    LaunchedEffect(team2Score) {
-        animationTriggerTeam2++
+    LaunchedEffect(myScore) {
+        myAnimationTrigger++
     }
 
     val vector by remember(gameType) {
@@ -105,16 +104,16 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
                     TennisPadelScoringUI(
                         servingPlayer = servingTeam,
                         gameIcon = vector,
-                        team1CurrentPointScore = team1Score,
-                        team2CurrentPointScore = team2Score,
-                        team1CurrentSetScore = team1SetScore,
-                        team2CurrentSetScore = team2SetScore,
-                        team1SetHistory = team1SetHistory,
-                        team2SetHistory = team2SetHistory,
-                        popTriggerTeam1 = animationTriggerTeam1,
-                        popTriggerTeam2 = animationTriggerTeam2,
-                        viewModel.getTeam1Color(),
-                        viewModel.getTeam2Color()
+                        opponentCurrentPointScore = opponentScore,
+                        myCurrentPointScore = myScore,
+                        opponentCurrentSetScore = opponentSetScore,
+                        myCurrentSetScore = mySetScore,
+                        opponentSetHistory = opponentSetResults,
+                        mySetHistory = mySetResults,
+                        opponentTriggerAnim = opponentAnimationTrigger,
+                        myTriggerAnim = myAnimationTrigger,
+                        opponentColor = viewModel.getOpponentColor(),
+                        myColor = viewModel.getMyColor()
                     ) {
                         viewModel.teamScored(it)
                     }
@@ -153,16 +152,16 @@ fun TennisPadelGameScreen(gameType: GameType, backToStart: () -> Unit) {
 fun TennisPadelScoringUI(
     servingPlayer: Int,
     gameIcon: Int,
-    team1CurrentPointScore: Int,
-    team2CurrentPointScore: Int,
-    team1CurrentSetScore: Int,
-    team2CurrentSetScore: Int,
-    team1SetHistory: List<Int>,
-    team2SetHistory: List<Int>,
-    popTriggerTeam1: Int,
-    popTriggerTeam2: Int,
-    team1Color: String,
-    team2Color: String,
+    opponentCurrentPointScore: Int,
+    myCurrentPointScore: Int,
+    opponentCurrentSetScore: Int,
+    myCurrentSetScore: Int,
+    opponentSetHistory: List<Int>,
+    mySetHistory: List<Int>,
+    opponentTriggerAnim: Int,
+    myTriggerAnim: Int,
+    opponentColor: String,
+    myColor: String,
     teamScored: (Int) -> Unit
 ) {
     var rootCenter by remember { mutableStateOf(Offset.Zero) }
@@ -183,7 +182,7 @@ fun TennisPadelScoringUI(
         Column(
             modifier = Modifier
                 .weight(0.7f)
-                .background(Color(("#$team1Color").toColorInt()).copy(0.5f))
+                .background(Color(("#$opponentColor").toColorInt()).copy(0.5f))
                 .fillMaxWidth()
                 .clickable(onClick = {
                     //Score for top team
@@ -206,8 +205,8 @@ fun TennisPadelScoringUI(
                         }
                     }
                     Row(Modifier.fillMaxWidth(0.7f), horizontalArrangement = Arrangement.Center) {
-                        team1SetHistory.forEachIndexed { index, score ->
-                            val score2 = team2SetHistory[index]
+                        opponentSetHistory.forEachIndexed { index, score ->
+                            val score2 = mySetHistory[index]
                             Text(
                                 "$score",
                                 textDecoration = if (score > score2) TextDecoration.Underline else null,
@@ -215,13 +214,13 @@ fun TennisPadelScoringUI(
                             )
                             Text(" | ")
                         }
-                        Text("$team1CurrentSetScore")
+                        Text("$opponentCurrentSetScore")
                     }
                 }
 
                 AnimatedScoreText(
-                    team1CurrentPointScore.getTennisScore(),
-                    popTriggerTeam1,
+                    opponentCurrentPointScore.getTennisScore(),
+                    opponentTriggerAnim,
                     rootCenter,
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.BottomEnd)
@@ -232,7 +231,7 @@ fun TennisPadelScoringUI(
             modifier = Modifier
                 .weight(0.7f)
                 .fillMaxWidth()
-                .background(Color(("#$team2Color").toColorInt()).copy(0.5f))
+                .background(Color(("#$myColor").toColorInt()).copy(0.5f))
                 .clickable(onClick = {
                     //Score for down team
                     teamScored(2)
@@ -254,8 +253,8 @@ fun TennisPadelScoringUI(
                         }
                     }
                     Row(Modifier.fillMaxWidth(0.7f), horizontalArrangement = Arrangement.Center) {
-                        team2SetHistory.forEachIndexed { index, score ->
-                            val score1 = team1SetHistory[index]
+                        mySetHistory.forEachIndexed { index, score ->
+                            val score1 = opponentSetHistory[index]
                             Text(
                                 "$score",
                                 textDecoration = if (score > score1) TextDecoration.Underline else null,
@@ -263,12 +262,12 @@ fun TennisPadelScoringUI(
                             )
                             Text(" | ")
                         }
-                        Text("$team2CurrentSetScore")
+                        Text("$myCurrentSetScore")
                     }
                 }
                 AnimatedScoreText(
-                    score = team2CurrentPointScore.getTennisScore(),
-                    popTrigger = popTriggerTeam2,
+                    score = myCurrentPointScore.getTennisScore(),
+                    popTrigger = myTriggerAnim,
                     rootCenter = rootCenter,
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.TopEnd)
@@ -297,8 +296,8 @@ fun TennisPadelPadelScoringUIPreview() {
                 3,
                 listOf(3, 2),
                 listOf(6, 6),
-                popTriggerTeam1 = 0,
-                popTriggerTeam2 = 0,
+                opponentTriggerAnim = 0,
+                myTriggerAnim = 0,
                 Color.Red.toArgb().toHexString(),
                 Color.Blue.toArgb().toHexString()
             ) { }

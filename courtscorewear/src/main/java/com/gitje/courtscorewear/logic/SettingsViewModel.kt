@@ -8,8 +8,8 @@ import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 
 const val SETTING_KEEP_SCREEN_ON = "keep_screen_on"
-const val SETTING_TEAM_1_COLOR = "setting_team_1_color"
-const val SETTING_TEAM_2_COLOR = "setting_team_2_color"
+const val SETTING_OPPONENT_COLOR = "setting_team_1_color"
+const val SETTING_MY_COLOR = "setting_team_2_color"
 
 class SettingsViewModel(
     application: Application,
@@ -20,14 +20,14 @@ class SettingsViewModel(
         return sharedPreferences.getBoolean(SETTING_KEEP_SCREEN_ON, false)
     }
 
-    fun getTeam1Color(): String {
+    fun getOpponentColor(): String {
         val fallback = Color.Red.toArgb().toHexString()
-        return sharedPreferences.getString(SETTING_TEAM_1_COLOR, fallback) ?: fallback
+        return sharedPreferences.getString(SETTING_OPPONENT_COLOR, fallback) ?: fallback
     }
 
-    fun getTeam2Color(): String {
+    fun getMyColor(): String {
         val fallback = Color.Blue.toArgb().toHexString()
-        return sharedPreferences.getString(SETTING_TEAM_2_COLOR, fallback) ?: fallback
+        return sharedPreferences.getString(SETTING_MY_COLOR, fallback) ?: fallback
     }
 
     fun setKeepScreenOn(on: Boolean) {
@@ -36,15 +36,15 @@ class SettingsViewModel(
         }
     }
 
-    fun setTeam1Color(color: String) {
+    fun setOpponentColor(color: String) {
         sharedPreferences.edit {
-            putString(SETTING_TEAM_1_COLOR, color)
+            putString(SETTING_OPPONENT_COLOR, color)
         }
     }
 
-    fun setTeam2Color(color: String) {
+    fun setMyColor(color: String) {
         sharedPreferences.edit {
-            putString(SETTING_TEAM_2_COLOR, color)
+            putString(SETTING_MY_COLOR, color)
         }
     }
 }
